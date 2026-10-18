@@ -1,0 +1,3920 @@
+<!-- Copyright (c) 2026 EDGE // SPACE (uxuvoyiz81-edge). All Rights Reserved. -->
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<title>EDGE // AI STUDIO — Multi-model hub · Arena · Tools</title>
+<meta name="description" content="EDGE AI STUDIO — browser-based multi-model chat, AI Arena comparison and zero-cost AI tools. Bring your own Key; your data never leaves the browser.">
+<meta name="theme-color" content="#070b10">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="preconnect" href="https://api.deepseek.com">
+<link rel="preconnect" href="https://open.bigmodel.cn">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+<style>
+/* ============================================================
+   EDGE // AI STUDIO — styles
+   Inherits the main site’s cyber dark palette：#070b10 background / #7fe6ff cyan / #39ff88 green
+   ============================================================ */
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#070b10; --panel:#0c141d; --panel2:#101a25; --line:rgba(127,230,255,.16);
+  --cyan:#7fe6ff; --green:#39ff88; --red:#ff8096; --amber:#ffc05a; --purple:#b98cff;
+  --txt:#dbe6ef; --dim:#7d8b99; --dim2:#5c6a77;
+  --r:12px; --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--txt);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  font-size:14px;line-height:1.6;overscroll-behavior-y:none}
+body{padding-bottom:env(safe-area-inset-bottom)}
+a{color:var(--cyan);text-decoration:none}
+button,input,select,textarea{font-family:inherit;font-size:inherit;color:inherit}
+input,textarea,select{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 11px;color:var(--txt);outline:none;width:100%}
+input:focus,textarea:focus,select:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(127,230,255,.1)}
+textarea{resize:vertical;min-height:70px;line-height:1.5}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-thumb{background:rgba(127,230,255,.22);border-radius:4px}
+::-webkit-scrollbar-track{background:transparent}
+
+/* ---------- Top bar ---------- */
+.top{position:sticky;top:0;z-index:60;background:rgba(7,11,16,.94);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);padding:8px 12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.logo{font-weight:800;font-size:15px;letter-spacing:.5px;white-space:nowrap;
+  background:linear-gradient(90deg,var(--cyan),var(--green));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.logo small{-webkit-text-fill-color:var(--dim);font-weight:600;font-size:10px;letter-spacing:0;margin-left:5px}
+.tabs{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+.tab{background:transparent;border:1px solid transparent;color:var(--dim);padding:6px 11px;border-radius:8px;cursor:pointer;font-size:12px;font-weight:600;white-space:nowrap;transition:.15s}
+.tab:hover{color:var(--txt);background:rgba(127,230,255,.06)}
+.tab.on{color:var(--bg);background:linear-gradient(90deg,var(--cyan),var(--green));border-color:transparent}
+.top-right{display:flex;align-items:center;gap:6px}
+.tbtn{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:6px 10px;cursor:pointer;font-size:11px;font-weight:600;color:var(--dim)}
+.tbtn:hover{color:var(--cyan);border-color:var(--cyan)}
+
+/* ---------- Layout ---------- */
+.wrap{max-width:1180px;margin:0 auto;padding:14px}
+.view{display:none;animation:fi .25s ease}
+.view.on{display:block}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:12px}
+.card h3{margin:0 0 10px;font-size:13px;color:var(--cyan);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.card h3 .cnt{font-size:10px;color:var(--dim);font-weight:500}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grid{display:grid;gap:10px}
+.g2{grid-template-columns:repeat(2,1fr)}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(4,1fr)}
+@media(max-width:820px){.g3,.g4{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.g2,.g3,.g4{grid-template-columns:1fr}.top{padding:7px 9px}.tabs{width:100%;margin-left:0;order:3}}
+
+/* ---------- Buttons ---------- */
+.btn{background:var(--panel2);border:1px solid var(--line);border-radius:8px;padding:9px 14px;cursor:pointer;
+  font-size:12px;font-weight:600;color:var(--txt);transition:.15s;white-space:nowrap}
+.btn:hover{border-color:var(--cyan);color:var(--cyan)}
+.btn.pri{background:linear-gradient(90deg,rgba(127,230,255,.16),rgba(57,255,136,.16));border-color:var(--cyan);color:var(--cyan)}
+.btn.pri:hover{background:linear-gradient(90deg,var(--cyan),var(--green));color:var(--bg)}
+.btn.sm{padding:5px 10px;font-size:11px}
+.btn.dan{border-color:rgba(255,128,150,.35);color:var(--red)}
+.btn.dan:hover{background:rgba(255,128,150,.12);border-color:var(--red)}
+.btn:disabled{opacity:.42;cursor:not-allowed}
+.btn.on{background:rgba(127,230,255,.16);border-color:var(--cyan);color:var(--cyan)}
+
+/* ---------- Provider cards ---------- */
+.prov{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:11px;transition:.15s}
+.prov:hover{border-color:rgba(127,230,255,.35)}
+.prov.on{border-color:var(--green);background:rgba(57,255,136,.05)}
+.prov-top{display:flex;align-items:center;gap:8px;margin-bottom:7px}
+.prov-ico{width:26px;height:26px;border-radius:7px;display:grid;place-items:center;font-size:14px;background:var(--panel2);flex:none}
+.prov-name{font-weight:700;font-size:12.5px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.badge{font-size:9px;padding:2px 6px;border-radius:5px;font-weight:700;letter-spacing:.3px;flex:none}
+.b-free{background:rgba(57,255,136,.14);color:var(--green)}
+.b-cors{background:rgba(127,230,255,.14);color:var(--cyan)}
+.b-warn{background:rgba(255,192,90,.14);color:var(--amber)}
+.b-off{background:rgba(125,139,153,.14);color:var(--dim)}
+.b-ok{background:rgba(57,255,136,.22);color:var(--green);font-size:11px;padding:2px 7px}
+.prov-desc{font-size:10.5px;color:var(--dim);margin-bottom:8px;line-height:1.5;min-height:30px}
+.prov input{font-size:11px;padding:7px 9px;font-family:var(--mono)}
+.prov-note{font-size:9.5px;color:var(--dim2);margin-top:5px;line-height:1.45}
+
+/* ---------- Chat ---------- */
+.chat-wrap{display:flex;flex-direction:column;height:calc(100vh - 190px);min-height:400px}
+@media(max-width:520px){.chat-wrap{height:calc(100vh - 220px)}}
+.msgs{flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:12px;
+  background:linear-gradient(180deg,rgba(127,230,255,.02),transparent);border-radius:var(--r);border:1px solid var(--line);margin-bottom:10px}
+.msg{max-width:88%;padding:10px 13px;border-radius:12px;font-size:13px;line-height:1.68;white-space:pre-wrap;word-break:break-word;animation:fi .2s}
+@keyframes fi2{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.msg{animation:fi2 .22s ease}
+.msg.me{align-self:flex-end;background:linear-gradient(135deg,rgba(127,230,255,.15),rgba(57,255,136,.12));border:1px solid rgba(127,230,255,.3);border-bottom-right-radius:4px}
+.msg.ai{align-self:flex-start;background:var(--panel);border:1px solid var(--line);border-bottom-left-radius:4px}
+.msg.who{font-size:9.5px;color:var(--dim);margin-bottom:4px;font-weight:700;letter-spacing:.4px;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.msg .tm{color:var(--dim2);font-weight:500}
+.msg.err{align-self:center;background:rgba(255,128,150,.1);border:1px solid rgba(255,128,150,.3);color:var(--red);font-size:11.5px;max-width:96%}
+.msg.sys{align-self:center;background:rgba(127,230,255,.07);border:1px solid var(--line);color:var(--dim);font-size:11px;text-align:center;max-width:96%}
+.cursor{display:inline-block;width:7px;height:14px;background:var(--cyan);animation:bl .8s infinite;vertical-align:text-bottom;margin-left:2px}
+@keyframes bl{0%,50%{opacity:1}51%,100%{opacity:0}}
+.md pre{background:#05080c;border:1px solid var(--line);border-radius:8px;padding:10px;overflow-x:auto;margin:8px 0}
+.md code{font-family:var(--mono);font-size:12px;background:rgba(127,230,255,.09);padding:1px 5px;border-radius:4px}
+.md pre code{background:none;padding:0}
+.md h1,.md h2,.md h3{margin:10px 0 6px;font-size:14px;color:var(--cyan)}
+.md ul,.md ol{margin:6px 0;padding-left:20px}
+.md p{margin:6px 0}
+.md table{border-collapse:collapse;margin:8px 0;font-size:12px;width:100%}
+.md th,.md td{border:1px solid var(--line);padding:5px 8px;text-align:left}
+.md blockquote{border-left:3px solid var(--cyan);margin:8px 0;padding-left:10px;color:var(--dim)}
+.md a{color:var(--cyan);text-decoration:underline}
+.composer{display:flex;gap:8px;align-items:flex-end}
+.composer textarea{flex:1;max-height:150px}
+.stopbtn{background:rgba(255,128,150,.15);border-color:var(--red);color:var(--red)}
+
+/* ---------- Arena ---------- */
+.arena-grid{display:grid;gap:10px;margin-top:12px}
+.a2{grid-template-columns:repeat(2,1fr)}
+.a3{grid-template-columns:repeat(3,1fr)}
+@media(max-width:820px){.a2,.a3{grid-template-columns:1fr}}
+.fighter{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);display:flex;flex-direction:column;min-height:230px;overflow:hidden}
+.fighter.win{border-color:var(--green);box-shadow:0 0 0 1px rgba(57,255,136,.25)}
+.f-head{padding:9px 11px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:7px;background:var(--panel2);flex-wrap:wrap}
+.f-name{font-weight:700;font-size:12px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.f-stat{font-size:9.5px;color:var(--dim);font-weight:600}
+.f-body{flex:1;overflow-y:auto;padding:11px;font-size:12.5px;line-height:1.65;white-space:pre-wrap;word-break:break-word}
+.f-body:empty::before{content:"Waiting to start…";color:var(--dim2);font-style:italic}
+.f-foot{padding:8px 11px;border-top:1px solid var(--line);display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.vote{font-size:10px;padding:4px 9px;border-radius:6px;cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--dim);font-weight:600}
+.vote:hover{border-color:var(--green);color:var(--green)}
+.vote.on{background:rgba(57,255,136,.18);border-color:var(--green);color:var(--green)}
+.pickbar{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.pick{font-size:11px;padding:6px 11px;border-radius:7px;cursor:pointer;border:1px solid var(--line);background:var(--panel2);color:var(--dim);font-weight:600;transition:.15s}
+.pick:hover{border-color:var(--cyan);color:var(--cyan)}
+.pick.on{background:linear-gradient(90deg,var(--cyan),var(--green));color:var(--bg);border-color:transparent}
+
+/* ---------- Tools ---------- */
+.tools{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:9px}
+.tool{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:12px;cursor:pointer;transition:.15s;text-align:left}
+.tool:hover{border-color:var(--cyan);transform:translateY(-2px);background:var(--panel2)}
+.tool-ico{font-size:20px;margin-bottom:6px}
+.tool-name{font-weight:700;font-size:12px;margin-bottom:3px}
+.tool-desc{font-size:10px;color:var(--dim);line-height:1.45}
+.toolbox-out{background:#05080c;border:1px solid var(--line);border-radius:8px;padding:11px;font-family:var(--mono);
+  font-size:11.5px;white-space:pre-wrap;word-break:break-all;max-height:340px;overflow-y:auto;line-height:1.6;min-height:60px}
+.toolbox-out:empty::before{content:"Results show up here";color:var(--dim2)}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;font-size:12px}
+.kv dt{color:var(--dim);font-weight:600}
+.kv dd{margin:0;font-family:var(--mono);font-size:11.5px;word-break:break-all}
+
+/* ---------- Modal ---------- */
+.mask{position:fixed;inset:0;background:rgba(3,6,10,.82);backdrop-filter:blur(4px);z-index:200;
+  display:none;align-items:center;justify-content:center;padding:16px}
+.mask.on{display:flex}
+.modal{background:var(--panel);border:1px solid var(--cyan);border-radius:14px;padding:18px;
+  max-width:560px;width:100%;max-height:86vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+.modal h3{margin:0 0 12px;font-size:15px;color:var(--cyan)}
+
+/* ---------- Misc ---------- */
+.hint{font-size:11px;color:var(--dim);line-height:1.65}
+.warnbox{background:rgba(255,192,90,.08);border:1px solid rgba(255,192,90,.28);border-radius:9px;padding:10px 12px;font-size:11px;color:var(--amber);line-height:1.65;margin-bottom:12px}
+.okbox{background:rgba(57,255,136,.07);border:1px solid rgba(57,255,136,.25);border-radius:9px;padding:10px 12px;font-size:11px;color:var(--green);line-height:1.6}
+.errbox{background:rgba(255,128,150,.09);border:1px solid rgba(255,128,150,.3);border-radius:9px;padding:10px 12px;font-size:11px;color:var(--red);line-height:1.6;word-break:break-word}
+.sep{height:1px;background:var(--line);margin:12px 0}
+.empty{text-align:center;color:var(--dim2);padding:26px 12px;font-size:12px;line-height:1.8}
+.tag{display:inline-block;font-size:9.5px;padding:2px 7px;border-radius:5px;background:var(--panel2);border:1px solid var(--line);color:var(--dim);font-weight:600}
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--panel);
+  border:1px solid var(--cyan);color:var(--cyan);padding:10px 18px;border-radius:10px;font-size:12px;font-weight:600;
+  z-index:500;opacity:0;pointer-events:none;transition:.25s;max-width:90vw;text-align:center}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid rgba(127,230,255,.25);border-top-color:var(--cyan);
+  border-radius:50%;animation:sp .7s linear infinite;vertical-align:middle}
+@keyframes sp{to{transform:rotate(360deg)}}
+.game-entry{display:block;background:linear-gradient(135deg,rgba(127,230,255,.09),rgba(57,255,136,.06));
+  border:1px solid rgba(127,230,255,.28);border-radius:var(--r);padding:13px;text-align:center;transition:.15s}
+.game-entry:hover{border-color:var(--cyan);transform:translateY(-2px)}
+.game-entry b{display:block;font-size:13px;color:var(--cyan);margin-bottom:3px}
+.game-entry span{font-size:10.5px;color:var(--dim)}
+/* ============================================================
+   sign-in gate / Account system — styles
+   ============================================================ */
+#authGate{position:fixed;inset:0;z-index:9999;background:
+  radial-gradient(1200px 600px at 50% -10%,rgba(127,230,255,.10),transparent 60%),var(--bg);
+  display:flex;align-items:center;justify-content:center;padding:18px;overflow-y:auto}
+#authGate.hide{display:none}
+.ag-box{width:100%;max-width:420px;background:var(--panel);border:1px solid var(--line);
+  border-radius:16px;padding:22px 20px;box-shadow:0 20px 60px rgba(0,0,0,.55);animation:fi .3s ease}
+.ag-logo{font-weight:800;font-size:22px;letter-spacing:.6px;text-align:center;
+  background:linear-gradient(90deg,var(--cyan),var(--green));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.ag-logo small{display:block;-webkit-text-fill-color:var(--dim);font-size:11px;font-weight:600;letter-spacing:2px;margin-top:3px}
+.ag-tabs{display:flex;gap:6px;margin:18px 0 14px;background:var(--panel2);padding:4px;border-radius:10px}
+.ag-tab{flex:1;background:transparent;border:0;color:var(--dim);padding:8px 6px;border-radius:7px;
+  cursor:pointer;font-size:12px;font-weight:700;transition:.15s}
+.ag-tab.on{background:linear-gradient(90deg,var(--cyan),var(--green));color:var(--bg)}
+.ag-note{font-size:11px;color:var(--dim2);line-height:1.6;margin-top:10px}
+.ag-note b{color:var(--amber)}
+.ag-err{color:var(--red);font-size:11px;min-height:16px;margin-top:8px}
+.ag-step{display:none}
+.ag-step.on{display:block}
+.ag-code{letter-spacing:8px;text-align:center;font-size:22px;font-family:var(--mono);padding:12px}
+.ag-mail{text-align:center;font-size:12px;color:var(--cyan);font-weight:700;margin:4px 0 12px;word-break:break-all}
+.ag-hero{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:14px}
+.ag-chip{font-size:11px;color:var(--dim);background:var(--panel2);border:1px solid var(--line);
+  border-radius:999px;padding:4px 10px}
+.ag-warn{background:rgba(255,192,90,.08);border:1px solid rgba(255,192,90,.3);border-radius:9px;
+  padding:9px 11px;font-size:11px;color:var(--amber);line-height:1.6;margin-top:12px}
+
+/* Account area in the top bar */
+.acct{display:flex;align-items:center;gap:7px}
+.acct-mail{font-size:11px;color:var(--dim);max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.acct-pts{font-size:11px;font-weight:800;color:var(--green);background:rgba(57,255,136,.10);
+  border:1px solid rgba(57,255,136,.28);border-radius:999px;padding:3px 9px;white-space:nowrap}
+.acct-badge{font-size:10px;font-weight:800;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.acct-badge.root{color:var(--bg);background:linear-gradient(90deg,var(--amber),var(--red))}
+.acct-badge.guest{color:var(--dim);background:var(--panel2);border:1px solid var(--line)}
+
+/* Free model bar */
+.pubbar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:rgba(185,140,255,.08);
+  border:1px solid rgba(185,140,255,.26);border-radius:10px;padding:8px 11px;margin-bottom:10px;font-size:11px}
+.pubbar b{color:var(--purple)}
+.pubbar .left{font-weight:800;color:var(--purple);background:rgba(185,140,255,.16);
+  border-radius:999px;padding:2px 9px;white-space:nowrap}
+
+/* Owner panel */
+.rootpanel{background:linear-gradient(180deg,rgba(255,192,90,.07),transparent);border-color:rgba(255,192,90,.3)}
+.rootpanel h3{color:var(--amber)}
+.locknote{text-align:center;padding:26px 14px;color:var(--dim);font-size:12px}
+.locknote b{display:block;color:var(--amber);font-size:14px;margin-bottom:6px}
+
+/* ---------- OAuth sign-in按钮（与Main Site一致的样式） ---------- */
+.ag-why{text-align:center;font-size:11.5px;color:var(--dim);line-height:1.7;margin:14px 0 16px}
+.ag-oauth{width:100%;display:flex;align-items:center;justify-content:center;gap:9px;
+  padding:11px 13px;margin-bottom:9px;border-radius:9px;cursor:pointer;
+  font-size:13px;font-weight:700;transition:.15s;border:1px solid var(--line);
+  background:var(--panel2);color:var(--txt)}
+.ag-oauth svg{flex:none}
+.ag-oauth:hover{border-color:var(--cyan);color:var(--cyan)}
+.ag-oauth.google:hover{background:rgba(66,133,244,.10);border-color:rgba(66,133,244,.5);color:#9fc2ff}
+.ag-oauth.github:hover{background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.4);color:#fff}
+.ag-oauth:disabled{opacity:.5;cursor:not-allowed}
+.ag-or{position:relative;text-align:center;margin:15px 0 11px}
+.ag-or::before{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:var(--line)}
+.ag-or span{position:relative;background:var(--panel);padding:0 10px;font-size:10.5px;color:var(--dim2)}
+
+/* ============================================================
+   Boot screen —— Reuses EDGE // SPACE’s cyberpunk ceremony
+   All variables are --bs-* prefixed and class names use bs- so nothing clashes with the main styles
+   ============================================================ */
+#bsScreen{
+  position:fixed; inset:0; z-index:9999;
+  background:
+    radial-gradient(ellipse at 50% 48%, rgba(127,230,255,.09), transparent 42%),
+    linear-gradient(180deg,#030609,#050b10 52%,#020508);
+  overflow:hidden;
+  display:grid; place-items:center;
+  transition:opacity .55s ease, transform .55s ease;
+}
+#bsScreen.out{opacity:0; transform:scale(1.04); pointer-events:none}
+
+/* Scanlines */
+.bs-scan{position:absolute;inset:0;pointer-events:none;z-index:5;opacity:.23;
+  background:repeating-linear-gradient(to bottom,transparent 0 3px,rgba(127,230,255,.08) 4px,transparent 5px)}
+
+/* Orbit ring */
+.bs-ambient{position:absolute;inset:0;overflow:hidden;pointer-events:none}
+.bs-orbit{position:absolute;width:min(76vw,490px);aspect-ratio:1;left:50%;top:50%;
+  transform:translate(-50%,-50%);border:1px solid rgba(127,230,255,.22);border-radius:50%;
+  box-shadow:0 0 40px rgba(127,230,255,.04);animation:bsOrbit 4s ease-in-out infinite}
+.bs-orbit::before,.bs-orbit::after{content:"";position:absolute;inset:10%;
+  border:1px solid rgba(127,230,255,.09);border-radius:50%}
+.bs-orbit::after{inset:24%;border-color:rgba(127,230,255,.07)}
+
+/* Ground grid */
+.bs-grid{position:absolute;left:-35%;right:-35%;bottom:-23%;height:53%;
+  transform:perspective(300px) rotateX(63deg);transform-origin:center top;
+  background-image:linear-gradient(rgba(127,230,255,.15) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(127,230,255,.13) 1px,transparent 1px);
+  background-size:100% 48px,58px 100%;
+  mask-image:linear-gradient(to bottom,transparent,black 22%,black 80%,transparent);
+  -webkit-mask-image:linear-gradient(to bottom,transparent,black 22%,black 80%,transparent)}
+
+/* Top title */
+.bs-top{position:absolute;top:max(7vh,36px);left:0;width:100%;text-align:center;
+  font-size:clamp(15px,4vw,26px);font-weight:bold;letter-spacing:.22em;white-space:nowrap;
+  color:var(--txt);font-family:var(--mono)}
+.bs-top b{color:var(--cyan);margin:0 .12em}
+
+/* Main panel */
+.bs-main{position:relative;z-index:2;width:min(88vw,570px);padding:clamp(24px,5vw,40px);
+  border:1px solid rgba(127,230,255,.25);background:rgba(3,9,13,.88);
+  box-shadow:0 0 0 1px rgba(127,230,255,.025),0 0 42px rgba(127,230,255,.065),
+    inset 0 0 32px rgba(127,230,255,.025);
+  backdrop-filter:blur(8px);font-family:var(--mono)}
+.bs-main::before,.bs-main::after{content:"";position:absolute;width:26px;height:3px;
+  background:var(--cyan);box-shadow:0 0 12px var(--cyan);top:-2px;left:22px}
+.bs-main::after{left:auto;right:22px}
+.bs-corner{position:absolute;width:11px;height:11px;border-color:var(--cyan);opacity:.65}
+.bs-c1{left:-1px;top:-1px;border-left:1px solid;border-top:1px solid}
+.bs-c2{right:-1px;top:-1px;border-right:1px solid;border-top:1px solid}
+.bs-c3{left:-1px;bottom:-1px;border-left:1px solid;border-bottom:1px solid}
+.bs-c4{right:-1px;bottom:-1px;border-right:1px solid;border-bottom:1px solid}
+
+/* Brand */
+.bs-brand{margin:0;font-size:clamp(24px,5.6vw,37px);font-weight:800;letter-spacing:.13em;
+  line-height:1.2;white-space:nowrap;color:var(--txt)}
+.bs-brand span{color:var(--cyan);text-shadow:0 0 15px rgba(127,230,255,.45)}
+
+/* Status line */
+.bs-status{margin:clamp(20px,4.4vw,33px) 0 0;font-size:clamp(12px,3.3vw,17px);
+  line-height:1.6;color:var(--green);overflow-wrap:anywhere}
+.bs-status strong{color:var(--cyan)}
+
+/* three indicators */
+.bs-metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;
+  margin-top:clamp(20px,3.6vw,28px)}
+.bs-metric{font-size:clamp(9.5px,2.5vw,12.5px);color:#83939b;white-space:nowrap;
+  display:flex;align-items:center;gap:0}
+.bs-metric i{display:inline-block;width:23px;height:5px;margin-left:7px;vertical-align:middle;
+  background:linear-gradient(90deg,#007d87,var(--green));box-shadow:0 0 8px rgba(127,230,255,.18);
+  animation:bsInd 1.6s ease-in-out infinite alternate}
+.bs-metric:nth-child(2) i{animation-delay:.3s}
+.bs-metric:nth-child(3) i{animation-delay:.6s}
+/* pending: grey, not blinking */
+.bs-metric.wait i{background:#2a3a44;box-shadow:none;animation:none;opacity:.5}
+
+/* Progress bar */
+.bs-track{width:100%;height:4px;margin-top:26px;background:#15242c;overflow:hidden}
+.bs-fill{width:0;height:100%;background:linear-gradient(90deg,var(--cyan),#008dff,var(--green));
+  box-shadow:0 0 12px rgba(127,230,255,.75);transition:width .25s linear}
+.bs-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:12px;
+  color:#71838c;font-size:11.5px;letter-spacing:.08em}
+#bsPct{font-size:15px;color:var(--cyan);font-weight:bold}
+
+/* Footer */
+.bs-bottom{display:flex;align-items:center;justify-content:center;gap:9px;
+  margin-top:clamp(18px,3.4vw,26px);color:#617a83;font-size:11px;letter-spacing:.12em}
+.bs-pulse{display:flex;gap:5px}
+.bs-pulse i{width:5px;height:5px;border-radius:50%;background:var(--cyan);opacity:.35;
+  animation:bsBlink 1s infinite}
+.bs-pulse i:nth-child(2){animation-delay:.18s}
+.bs-pulse i:nth-child(3){animation-delay:.36s}
+
+/* Footer */
+.bs-footer{position:absolute;bottom:max(4vh,20px);left:0;width:100%;text-align:center;
+  color:#38535e;font-size:10px;letter-spacing:.2em;font-family:var(--mono)}
+
+@keyframes bsOrbit{0%,100%{box-shadow:0 0 25px rgba(127,230,255,.025)}
+  50%{box-shadow:0 0 48px rgba(127,230,255,.09)}}
+@keyframes bsBlink{0%,100%{opacity:.25;transform:scale(.85)}50%{opacity:1;transform:scale(1.15)}}
+@keyframes bsInd{from{opacity:.35}to{opacity:1}}
+
+@media(max-width:380px){
+  .bs-main{width:92vw;padding:22px 18px}
+  .bs-metric i{width:14px;margin-left:3px}
+  .bs-brand{letter-spacing:.09em}
+}
+@media(prefers-reduced-motion:reduce){
+  .bs-orbit,.bs-metric i,.bs-pulse i{animation-duration:3s}
+}
+
+
+/* ============================================================
+   Two modes: easy / and pro
+   ============================================================ */
+body.edge-mode-easy #chatTemp,
+body.edge-mode-easy #chatTempLbl,
+body.edge-mode-easy #chatStreamWrap,
+body.edge-mode-easy .tab[data-v="arena"],
+body.edge-mode-easy #ksAdmin,
+body.edge-mode-easy #aicapHost,
+body.edge-mode-easy .pro-only{ display:none !important; }
+body.edge-mode-pro .easy-only{ display:none !important; }
+#modeSwitch button{ transition:all .18s; }
+/* Narrow screens: the top-right wraps, long emails are hidden, no horizontal overflow */
+@media(max-width:560px){
+  .top-right{flex-wrap:wrap;justify-content:flex-end;min-width:0}
+  #modeSwitch button{padding:5px 9px !important;font-size:10.5px !important}
+  .acct-mail{display:none}
+}
+#easyGuide h3{ font-size:13px; margin:0 0 9px; }
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     Boot screen —— EDGE // SPACE style
+     信号真实：SDK 就绪 / 界面就绪 / and account sync all green before collapsing
+     ============================================================ -->
+<div id="bsScreen">
+  <div class="bs-ambient" aria-hidden="true">
+    <div class="bs-orbit"></div>
+    <div class="bs-grid"></div>
+  </div>
+
+  <div class="bs-top">EDGE <b>//</b> GLOBAL</div>
+
+  <main class="bs-main" role="status" aria-live="polite">
+    <i class="bs-corner bs-c1"></i><i class="bs-corner bs-c2"></i>
+    <i class="bs-corner bs-c3"></i><i class="bs-corner bs-c4"></i>
+
+    <h1 class="bs-brand">EDGE <span>//</span> AI STUDIO</h1>
+
+    <p class="bs-status">
+      <strong>SYS://</strong>
+      Multi-model workspace
+      <span id="bsState">initialising</span>
+    </p>
+
+    <div class="bs-metrics">
+      <div class="bs-metric wait" id="bsM1">Runtime <i></i></div>
+      <div class="bs-metric wait" id="bsM2">Model library <i></i></div>
+      <div class="bs-metric wait" id="bsM3">Account <i></i></div>
+    </div>
+
+    <div class="bs-track"><div class="bs-fill" id="bsFill"></div></div>
+
+    <div class="bs-row">
+      <span id="bsLabel">INITIALISING SYSTEM</span>
+      <span id="bsPct">0%</span>
+    </div>
+
+    <div class="bs-bottom">
+      <span class="bs-pulse" aria-hidden="true"><i></i><i></i><i></i></span>
+      <span id="bsMsg">Establishing a secure connection</span>
+    </div>
+  </main>
+
+  <div class="bs-footer">SECURE SYSTEM · EDGE INTERFACE · V1.0</div>
+  <div class="bs-scan" aria-hidden="true"></div>
+</div>
+
+
+<!-- ============================================================
+     sign-in gate —— 未Sign in时盖住整个应用
+     ============================================================ -->
+<!-- ============================================================
+     sign-in gate —— 未Sign in时盖住整个应用（与Main Site一致：Google / GitHub OAuth）
+     ============================================================ -->
+<div id="authGate">
+  <div class="ag-box">
+    <div class="ag-logo">EDGE<small>AI STUDIO</small></div>
+
+    <div class="ag-why">Sign in to unlock Tools · points sync with the main site · use the owner’s free models</div>
+
+    <button class="ag-oauth google" onclick="oauthLogin('google')">
+      <svg viewBox='0 0 48 48' width='19' height='19' aria-hidden='true'><path fill='#EA4335' d='M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z'/><path fill='#4285F4' d='M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z'/><path fill='#FBBC05' d='M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z'/><path fill='#34A853' d='M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z'/></svg>
+      Continue with Google
+    </button>
+
+    <button class="ag-oauth github" onclick="oauthLogin('github')">
+      <svg viewBox='0 0 16 16' width='18' height='18' fill='currentColor' aria-hidden='true'><path d='M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.07-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.42 7.42 0 0 1 2-.27c.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A7.995 7.995 0 0 0 16 8c0-4.42-3.58-8-8-8z'/></svg>
+      Continue with GitHub
+    </button>
+
+    <div class="ag-err" id="agErr"></div>
+
+    <div class="ag-or"><span>Or use an email code</span></div>
+
+    <div id="agMailWrap">
+      <input id="agEmail" type="email" placeholder="you@example.com" autocomplete="email">
+      <button class="btn sm" style="width:100%;margin-top:7px" onclick="agSendCode()">📧 Send code</button>
+    </div>
+
+    <div id="agCodeWrap" style="display:none;margin-top:9px">
+      <div class="ag-mail" id="agMailShow"></div>
+      <input class="ag-code" id="agCode" inputmode="numeric" maxlength="6" placeholder="000000">
+      <div class="ag-err" id="agErr2"></div>
+      <button class="btn pri" style="width:100%;margin-top:8px" onclick="agVerify()">✅ Verify and enter</button>
+      <button class="btn sm" style="width:100%;margin-top:7px" onclick="agBack()">← Use another email</button>
+    </div>
+
+    <button class="btn" style="width:100%;margin-top:14px" onclick="agGuest()">🎟 Browse as guest (no sign-in)</button>
+
+    <div class="ag-hero">
+      <span class="ag-chip">🔒 Bring your own Key · it never leaves your browser</span>
+      <span class="ag-chip">🎮 Points sync with the main site</span>
+      <span class="ag-chip">⚔️ Multi-model collaboration</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============ 顶栏 ============ -->
+<div class="top">
+  <div class="logo">EDGE<small>AI STUDIO</small></div>
+  <div class="tabs">
+    <button class="tab on" data-v="chat" onclick="go('chat',this)">💬 Chat</button>
+    <button class="tab" data-v="arena" onclick="go('arena',this)">⚔️ Arena</button>
+    <button class="tab" data-v="tools" onclick="go('tools',this)">🧰 Tools</button>
+    <button class="tab" data-v="keys" onclick="go('keys',this)">🔑 Keys</button>
+    <button class="tab" data-v="games" onclick="go('games',this)">🎮 Games</button>
+  </div>
+  <div class="top-right">
+    <button class="tbtn" onclick="openHelp()">❓</button>
+    <button class="tbtn" onclick="goHome()">🏠 Main Site</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ============ 安全提示（只提示一次） ============ -->
+<div id="secNote" class="warnbox" style="display:none">
+  🔒 <b>About API Key safety</b><br>
+  Keys live only in this device’s browser (localStorage),<b>and are never uploaded to any server</b>。<br>
+  but a shared device or browser could still read them —— For sensitive use, turn on session-only mode.<br>
+  <button class="btn sm" style="margin-top:7px" onclick="hideSecNote()">Got it, don’t show again</button>
+</div>
+
+<!-- ============================================================
+     View 1: Chat
+     ============================================================ -->
+<section id="v-chat" class="view on">
+  <div class="card" style="padding:10px 12px">
+    <div class="row">
+      <span style="font-size:11px;color:var(--dim);font-weight:600">Model</span>
+      <select id="chatModel" style="max-width:230px"></select>
+      <span id="chatTempLbl" style="font-size:11px;color:var(--dim);font-weight:600">Temperature</span>
+      <input id="chatTemp" type="number" value="0.7" min="0" max="2" step="0.1" style="width:70px">
+      <label id="chatStreamWrap" style="font-size:11px;color:var(--dim);display:flex;align-items:center;gap:4px;cursor:pointer">
+        <input type="checkbox" id="chatStream" checked style="width:auto"> Stream
+      </label>
+      <button class="btn sm" onclick="clearChat()">🗑 Clear</button>
+      <button class="btn sm" onclick="exportChat()">📋 Export</button>
+      <span id="chatStat" style="font-size:10.5px;color:var(--dim2);margin-left:auto"></span>
+    </div>
+  </div>
+
+  <div class="chat-wrap">
+    <div id="msgs" class="msgs"></div>
+    <div class="composer">
+      <textarea id="chatIn" placeholder="Type a message, Enter to send / Shift+Enter for a new line&#10;e.g. explain what a CDN is in one sentence"></textarea>
+      <button class="btn pri" id="sendBtn" onclick="sendChat()" style="height:44px">Send</button>
+      <button class="btn stopbtn" id="stopBtn" onclick="stopChat()" style="height:44px;display:none">Stop</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================
+     视图 2：Arena
+     ============================================================ -->
+<section id="v-arena" class="view">
+  <div class="card">
+    <h3>⚔️ AI Arena <span class="cnt">One question, several models head to head</span></h3>
+    <textarea id="arenaQ" placeholder="Enter a question to compare…&#10;e.g. explain quantum computing in under 50 words"></textarea>
+    <div style="margin-top:9px">
+      <div style="font-size:11px;color:var(--dim);font-weight:600;margin-bottom:6px">
+        Pick the competing models <span id="arenaCount" style="color:var(--cyan)"></span>
+        <span style="color:var(--dim2);font-weight:400">（Pick 2–4, they must have a Key filled in)</span>
+      </div>
+      <div id="arenaPick" class="pickbar"></div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn pri" id="arenaGo" onclick="runArena()">⚔️ Start duel</button>
+      <button class="btn" onclick="clearArena()">🗑 Clear</button>
+      <button class="btn" onclick="copyArena()">📋 Copy all</button>
+      <span id="arenaStat" style="font-size:10.5px;color:var(--dim2)"></span>
+    </div>
+  </div>
+  <div id="arenaGrid" class="arena-grid a2"></div>
+</section>
+
+<!-- ============================================================
+     视图 3：Tools
+     ============================================================ -->
+<section id="v-tools" class="view">
+  <div class="card">
+    <h3>🧰 AI Tools <span class="cnt">Runs fully local · free · offline</span></h3>
+    <div class="row" style="margin-bottom:10px">
+      <button class="btn sm" onclick="backTools()">← All tools</button>
+      <span id="toolTitle" style="font-size:13px;font-weight:700;color:var(--cyan)"></span>
+    </div>
+    <div id="toolList" class="tools"></div>
+    <div id="toolPanel" style="display:none"></div>
+  </div>
+</section>
+
+<!-- ============================================================
+     View 4: Keys
+     ============================================================ -->
+<section id="v-keys" class="view">
+  <div class="card" id="proxyCard">
+    <h3>🛰 Relay <span class="cnt">Fixes Failed to fetch / CORS</span></h3>
+    <div class="ag-warn" style="margin:0 0 10px">
+      Error <strong>Failed to fetch</strong> = the other server’s CORS policy blocked the browser.
+      Your Key isn’t wrong — direct browser access is blocked. Fill in a relay address to fix it.
+    </div>
+    <div class="grid g2">
+      <div style="grid-column:1/-1">
+        <label style="font-size:11px;color:var(--dim)">Relay address (Cloudflare Worker)</label>
+        <input id="pxUrl" placeholder="https://edge-ai-proxy.youraccount.workers.dev"
+               oninput="saveProxy(this.value)">
+      </div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn pri" onclick="testProxy()">🔌 Test relay</button>
+      <button class="btn sm" onclick="clearProxy()">Turn off relay (direct)</button>
+      <span id="pxState" style="font-size:11px;color:var(--dim)"></span>
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--dim2);line-height:1.7">
+      The relay only forwards requests,<strong>It stores no Keys</strong> —— Key they’re still sent by your browser。<br>
+      No relay yet? Deploy the bundled <code>edge-proxy-worker.js</code> to Cloudflare (free):
+      <code>npx wrangler deploy</code>
+    </div>
+  </div>
+  <div class="card">
+    <h3>🔑 Model Keys <span class="cnt">Your own Keys · stored in this browser only</span></h3>
+    <div class="row" style="margin-bottom:11px">
+      <label style="font-size:11px;color:var(--dim);display:flex;align-items:center;gap:5px;cursor:pointer">
+        <input type="checkbox" id="sessOnly" style="width:auto"> This session only (forgotten when you close the browser, safer)
+      </label>
+      <button class="btn sm" onclick="testAllKeys()">🔌 Test saved</button>
+      <button class="btn sm dan" onclick="clearAllKeys()">🗑 Clear all</button>
+    </div>
+    <div id="ksBar"></div>
+    <div id="provList" class="grid g3"></div>
+  </div>
+  <div class="card">
+    <h3>➕ Custom endpoint <span class="cnt">Any OpenAI-compatible endpoint works</span></h3>
+    <div class="grid g2">
+      <div><label style="font-size:11px;color:var(--dim)">Display name</label><input id="cuName" placeholder="e.g. my private server"></div>
+      <div><label style="font-size:11px;color:var(--dim)">Base URL（no trailing slash)</label><input id="cuBase" placeholder="https://api.xxx.com/v1"></div>
+      <div><label style="font-size:11px;color:var(--dim)">API Key</label><input id="cuKey" placeholder="sk-..."></div>
+      <div><label style="font-size:11px;color:var(--dim)">Model IDs (comma separated)</label><input id="cuModel" placeholder="gpt-4o-mini,claude-3"></div>
+    </div>
+    <button class="btn pri" style="margin-top:10px" onclick="addCustom()">➕ Add</button>
+    <div id="cuList" style="margin-top:11px"></div>
+  </div>
+</section>
+
+<!-- ============================================================
+     View 5: Games
+     ============================================================ -->
+<section id="v-games" class="view">
+  <div class="card">
+    <h3>🎮 Game Center <span class="cnt">11 mini-games · points synced with the main site</span></h3>
+    <div class="grid g2">
+      <a class="game-entry" href="https://gameedge.pages.dev/" target="_blank" rel="noopener">
+        <b>🎮 EDGE GAME Standalone Game Site</b>
+        <span>Snake / 2048 / Breakout / Gun Fight / Tetris / Minesweeper / Memory Match / Reaction Test / Pin Master / Flappy Pipe / Whack-a-Mole</span>
+      </a>
+      <a class="game-entry" href="https://eclk0963.ccwu.cc/#games" target="_blank" rel="noopener">
+        <b>🏠 Main site games</b>
+        <span>Back to the game area on the main site · points and items sync live</span>
+      </a>
+    </div>
+    <div class="sep"></div>
+    <div class="hint">
+      The games don’t run on this site (deployed separately at <code style="font-family:var(--mono);font-size:10.5px">gameedge.pages.dev</code>），
+      to keep game performance and load speed fast。Click any card above to start playing.
+    </div>
+  </div>
+</section>
+
+</div><!-- /wrap -->
+
+<!-- ============ 弹窗 ============ -->
+<div id="mask" class="mask" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalBox"></div>
+</div>
+
+<div id="toast" class="toast"></div>
+<script>
+/* ============================================================
+   Provider table
+   ------------------------------------------------------------
+   cors 字段说明（浏览器直连的关键）：
+     'ok'   —— 官方支持 CORS，浏览器可直接调
+     'warn' —— 需要额外设置或特殊 header
+     'no'   —— 不支持，浏览器直连必Failed（需服务端中转）
+   ============================================================ */
+var PROVIDERS = [
+  {
+    id:'hunyuan', name:'Tencent Hunyuan (Direct)', icon:'🐧', cors:'no', free:true,
+    base:'https://api.hunyuan.cloud.tencent.com/v1',
+    keyUrl:'https://console.cloud.tencent.com/hunyuan/start',
+    desc:'China-built · OpenAI compatible · hunyuan-lite free forever',
+    models:['hunyuan-lite','hunyuan-turbo','hunyuan-t1','hunyuan-large'],
+    note:'lite is free forever; console → Hunyuan → API key management'
+  },
+  {
+    id:'tokenhub-gw', name:'TokenHub Hy4 (via Gateway)', icon:'🐧', cors:'ok', free:true,
+    base:'https://gateway.ai.cloudflare.com/v1/8fa16b2965ce7b8a922754d5877c164a/edge-ai/custom-tokenhub/v1',
+    keyUrl:'https://console.cloud.tencent.com/',
+    desc:'Via Cloudflare Gateway · No CORS block',
+    models:['hy4-preview'],
+    note:'Need to fill TokenHub Provider Keys in Cloudflare Gateway'
+  },
+  {
+    id:'siliconflow', name:'SiliconFlow', icon:'🔥', cors:'ok', free:true,
+    base:'https://api.siliconflow.cn/v1',
+    keyUrl:'https://cloud.siliconflow.cn/',
+    desc:'Aggregator · free quota on many open models · Chinese friendly',
+    models:['Qwen/Qwen2.5-7B-Instruct','Qwen/Qwen2.5-72B-Instruct','deepseek-ai/DeepSeek-V3','THUDM/glm-4-9b-chat','meta-llama/Llama-3.3-70B-Instruct'],
+    note:'Sign-up gives free quota, some models are free'
+  },
+  {
+    id:'openrouter', name:'OpenRouter', icon:'🌐', cors:'ok', free:true,
+    base:'https://openrouter.ai/api/v1',
+    keyUrl:'https://openrouter.ai/keys',
+    desc:'Hundreds of models · many :free models · no VPN needed',
+    models:['deepseek/deepseek-r1:free','qwen/qwen3-235b-a22b:free','google/gemma-3-27b-it:free','meta-llama/llama-3.3-70b-instruct:free','mistralai/mistral-nemo:free'],
+    note:'Models ending in :free are completely free'
+  },
+  {
+    id:'deepseek', name:'DeepSeek', icon:'🐳', cors:'ok', free:false,
+    base:'https://api.deepseek.com/v1',
+    keyUrl:'https://platform.deepseek.com/api_keys',
+    desc:'Strong reasoning · very cheap · a homegrown standout',
+    models:['deepseek-chat','deepseek-reasoner'],
+    note:'About ¥1 per million tokens, very cheap'
+  },
+  {
+    id:'zhipu', name:'Zhipu GLM', icon:'🧠', cors:'ok', free:true,
+    base:'https://open.bigmodel.cn/api/paas/v4',
+    keyUrl:'https://open.bigmodel.cn/usercenter/apikeys',
+    desc:'China-built · GLM-4 series · free models available',
+    models:['glm-4-flash','glm-4-plus','glm-4-air','glm-4-long'],
+    note:'glm-4-flash is free'
+  },
+  {
+    id:'moonshot', name:'Moonshot Kimi', icon:'🌙', cors:'ok', free:false,
+    base:'https://api.moonshot.cn/v1',
+    keyUrl:'https://platform.moonshot.cn/console/api-keys',
+    desc:'Great at long text · 200K context',
+    models:['moonshot-v1-8k','moonshot-v1-32k','moonshot-v1-128k'],
+    note:'New users get free quota'
+  },
+  {
+    id:'openai', name:'OpenAI', icon:'🤖', cors:'ok', free:false,
+    base:'https://api.openai.com/v1',
+    keyUrl:'https://platform.openai.com/api-keys',
+    desc:'GPT series · biggest ecosystem',
+    models:['gpt-4o-mini','gpt-4o','gpt-4.1-mini','o4-mini'],
+    note:'needs access; gpt-4o-mini is cheapest'
+  },
+  {
+    id:'gemini', name:'Google Gemini', icon:'✨', cors:'ok', free:true,
+    base:'https://generativelanguage.googleapis.com/v1beta/openai',
+    keyUrl:'https://aistudio.google.com/apikey',
+    desc:'Google · has a free tier · OpenAI format compatible',
+    models:['gemini-2.0-flash','gemini-2.5-flash','gemini-2.5-pro'],
+    note:'The free tier is enough for personal use'
+  },
+  {
+    id:'anthropic', name:'Anthropic Claude', icon:'🎭', cors:'warn', free:false,
+    base:'https://api.anthropic.com/v1',
+    keyUrl:'https://console.anthropic.com/settings/keys',
+    desc:'Claude series · great at long text and code',
+    models:['claude-3-5-sonnet-latest','claude-3-5-haiku-latest','claude-opus-4-1'],
+    note:'Browser access needs a special header (built in)',
+    special:'anthropic'
+  },
+  {
+    id:'qwen', name:'Alibaba Qwen', icon:'☁️', cors:'ok', free:true,
+    base:'https://dashscope.aliyuncs.com/compatible-mode/v1',
+    keyUrl:'https://bailian.console.aliyun.com/?tab=model#/api-key',
+    desc:'China-built · compatible mode · some models free',
+    models:['qwen-plus','qwen-turbo','qwen-max','qwen2.5-7b-instruct'],
+    note:'Use the compatible-mode endpoint for CORS'
+  },
+  {
+    id:'ollama', name:'Ollama local', icon:'💻', cors:'warn', free:true,
+    base:'http://localhost:11434/v1',
+    keyUrl:'https://ollama.com/',
+    desc:'Fully local · zero cost · needs Ollama installed',
+    models:['llama3.2','qwen2.5','deepseek-r1:7b','gemma2'],
+    note:'Set OLLAMA_ORIGINS=* for CORS; an https page calling http is blocked, use Chrome'
+  }
+];
+
+/* Anthropic 走独立协议，不走 /chat/completions */
+function isAnthropic(p){ return p && p.special === 'anthropic'; }
+function isGeminiNative(){ return false; } // Everything goes through the OpenAI-compatible endpoint
+
+/* Combine provider + model into one globally unique key */
+function mkKey(pid, model){ return pid + '::' + model; }
+
+/* Expands into a selectable model list: each entry = vendor + concrete model */
+function allChoices(){
+  var out = [];
+  PROVIDERS.forEach(function(p){
+    (p.models||[]).forEach(function(m){ out.push({pid:p.id, model:m}); });
+  });
+  (customProvs()||[]).forEach(function(p){
+    (p.models||[]).forEach(function(m){ out.push({pid:p.id, model:m, custom:true}); });
+  });
+  return out;
+}
+
+function findProv(pid){
+  var a = PROVIDERS.filter(function(p){return p.id===pid});
+  if(a.length) return a[0];
+  var c = (customProvs()||[]).filter(function(p){return p.id===pid});
+  return c.length ? c[0] : null;
+}
+
+
+/* ============================================================
+   Core engine: storage / unified call / stream parsing / error diagnosis
+   ============================================================ */
+
+/* ---------- Storage ---------- */
+function sessOnly(){ var e=document.getElementById('sessOnly'); return !!(e&&e.checked); }
+function store(){ try{ return sessOnly() ? sessionStorage : localStorage }catch(e){ return null } }
+function LS(){
+  var s=store(); if(!s) return null;
+  try{ return JSON.parse(s.getItem('edge_ai_keys')||'{}') }catch(e){ return {} }
+}
+function LSsave(o){ var s=store(); if(s) try{ s.setItem('edge_ai_keys', JSON.stringify(o||{})) }catch(e){} }
+function getKey(pid){ var o=LS(); return (o&&o[pid])||''; }
+function setKey(pid,v){ var o=LS()||{}; if(v){o[pid]=v}else{delete o[pid]} LSsave(o); }
+
+function customProvs(){
+  var s=store(); if(!s) return [];
+  try{ return JSON.parse(s.getItem('edge_ai_custom')||'[]') }catch(e){ return [] }
+}
+function saveCustom(arr){ var s=store(); if(s) try{ s.setItem('edge_ai_custom', JSON.stringify(arr||[])) }catch(e){} }
+
+function chatHist(){
+  var s=store(); if(!s) return [];
+  try{ return JSON.parse(s.getItem('edge_ai_hist')||'[]') }catch(e){ return [] }
+}
+function saveHist(a){ var s=store(); if(s) try{ s.setItem('edge_ai_hist', JSON.stringify((a||[]).slice(-60))) }catch(e){} }
+
+/* ---------- Helpers ---------- */
+var _t=null;
+function toast(m){
+  var e=document.getElementById('toast'); if(!e) return;
+  e.textContent=m; e.classList.add('on');
+  clearTimeout(_t); _t=setTimeout(function(){e.classList.remove('on')},2200);
+}
+function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g,function(c){
+  return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+
+/* Minimal Markdown renderer (good enough, no external libs) */
+function md(src){
+  if(!src) return '';
+  var s=String(src);
+  /* Pull code blocks out first so other rules don’t mangle them */
+  var codes=[];
+  s=s.replace(/```(\w+)?\n?([\s\S]*?)```/g,function(_,lang,code){
+    codes.push('<pre><code>'+esc(code.replace(/\n$/,''))+'</code></pre>');
+    return '\u0000C'+(codes.length-1)+'\u0000';
+  });
+  s=esc(s);
+  s=s.replace(/`([^`\n]+)`/g,'<code>$1</code>');
+  s=s.replace(/^###\s+(.+)$/gm,'<h3>$1</h3>')
+     .replace(/^##\s+(.+)$/gm,'<h2>$1</h2>')
+     .replace(/^#\s+(.+)$/gm,'<h1>$1</h1>');
+  s=s.replace(/^\s*[-*]\s+(.+)$/gm,'<li>$1</li>');
+  s=s.replace(/(<li>.*<\/li>)/g,'<ul>$1</ul>');
+  s=s.replace(/\*\*([^*\n]+)\*\*/g,'<b>$1</b>');
+  s=s.replace(/(^|\n)(?!<)((?:[^\n]+)(?:\n(?!<)[^\n]+)*)/g,function(m,p1){
+    var body=m.slice(p1.length);
+    if(!body.trim()) return m;
+    if(/^\s*<[a-z][a-z0-9]*>/i.test(body)) return m;
+    return p1+'<p>'+body+'</p>';
+  });
+  s=s.replace(/\u0000C(\d+)\u0000/g,function(_,i){ return codes[+i]||''; });
+  s=s.replace(/<p>(<pre>[\s\S]*?<\/pre>)<\/p>/g,'$1');
+  s=s.replace(/<p>(<ul>[\s\S]*?<\/ul>)<\/p>/g,'$1');
+  return s;
+}
+
+/* ---------- error diagnosis：把 fetch Error翻成人话 ---------- */
+function diag(err, status, body, prov, model){
+  var m=String((err&&err.message)||err||'');
+  var b=String(body||'');
+
+  if(/Failed to fetch|NetworkError|Load failed|ERR_/i.test(m)){
+    var tail='';
+    if(prov && prov.cors==='no')
+      tail = (ACCT.proxyUrl && ACCT.proxyUrl.trim())
+        ? '\nRelay is on but still no connection — check that the Worker deployed and the address is correct.'
+        : '\nThis provider doesn’t allow direct browser calls; it needs a relay.\nAdd a relay address at the bottom of the Keys page.';
+    else if(prov && prov.cors==='warn')
+      tail='\nThis provider needs extra setup to allow cross-origin calls (see the Keys page).';
+    else if(prov && /localhost|127\.0\.0\.1/.test(prov.base||''))
+      tail='\nIs your local service running? Also, an https page calling http will be blocked by the browser.';
+    else
+      tail = (ACCT.proxyUrl && ACCT.proxyUrl.trim())
+        ? '\nA relay is set but it still won’t connect — check the relay address and whether the Worker deployed.\nUse 🔌 Test relay on the Keys page to verify it alone.'
+        : '\nThe other side’s CORS policy blocked the direct browser call (your Key is fine).\nFix: add a relay address at the top of the Keys page.';
+    return {title:'Can’t connect', msg:m+tail, fix: (prov&&prov.cors==='warn')?'show-cors':''};
+  }
+  if(status===401||status===403)
+    return {title:'Invalid Key or no permission', msg:'API returned '+status+'. The Key is wrong / expired / this model isn’t enabled.\n'+(b?('Response: '+b.slice(0,200)):'')};
+  if(status===429)
+    return {title:'Rate limited or quota used up', msg:'API returned 429. Either you’re calling too fast or your balance is low.\n'+(b?('Response: '+b.slice(0,200)):'')};
+  if(status===404)
+    return {title:'Model not found', msg:'API returned 404. "'+model+'" may be the wrong model name, or your account can’t use it.\n'+(b?('Response: '+b.slice(0,200)):'')};
+  if(status===400)
+    return {title:'Bad request parameters', msg:'API returned 400. The model name or a parameter may be incompatible.\n'+(b?('Response: '+b.slice(0,200)):'')};
+  if(/abort/i.test(m)) return {title:'Stopped', msg:'You stopped this request.'};
+  if(status) return {title:'API returned '+status, msg:b.slice(0,300)||m};
+  return {title:'Something went wrong', msg:m||'Unknown error'};
+}
+
+/* ============================================================
+   unified call
+   opts: {messages, temperature, stream, onDelta, signal, maxTokens}
+   返回 {ok:true, text} 或 {ok:false, err:{title,msg}}
+   ============================================================ */
+async function callAI(prov, model, opts){
+  opts = opts || {};
+  if(!prov) return {ok:false, err:{title:'No provider selected', msg:'Provider configuration is missing.'}};
+  var key = getKey(prov.id);
+  if(!key && !/localhost|127\.0\.0\.1/.test(prov.base||''))
+    return {ok:false, err:{title:'No Key filled in', msg:'Go to the 🔑 Keys page and fill in '+prov.name+'’s API Key.'}};
+
+  var ctl = new AbortController();
+  var timer = setTimeout(function(){ try{ctl.abort()}catch(e){} }, opts.timeout||120000);
+  if(opts.signal){
+    try{ opts.signal.addEventListener('abort', function(){ try{ctl.abort()}catch(e){} }); }catch(e){}
+  }
+
+  var url, headers, body;
+  var temp = (opts.temperature==null?0.7:opts.temperature);
+  var maxt = opts.maxTokens||2000;
+
+  if(isAnthropic(prov)){
+    /* Anthropic 独立协议 */
+    url = (prov.base||'https://api.anthropic.com/v1') + '/messages';
+    headers = {
+      'Content-Type':'application/json',
+      'x-api-key': key,
+      'anthropic-version':'2023-06-01',
+      'anthropic-dangerous-direct-browser-access':'true'
+    };
+    var sys='', arr=[];
+    (opts.messages||[]).forEach(function(m){
+      if(m.role==='system'){ sys=m.content; return }
+      arr.push({role:(m.role==='assistant'?'assistant':'user'), content:m.content});
+    });
+    body = { model:model, messages:arr, max_tokens:maxt, temperature:temp, stream:!!opts.stream };
+    if(sys) body.system = sys;
+    if(opts._extra) for(var _k in opts._extra){ var _v=opts._extra[_k]; if(_v!==null && _v!=='' && !isNaN(_v)) body[_k]=_v; }
+  }else{
+    /* OpenAI 兼容协议 */
+    url = (prov.base||'').replace(/\/+$/,'') + '/chat/completions';
+    headers = { 'Content-Type':'application/json', 'Authorization':'Bearer '+key };
+    body = { model:model, messages:opts.messages||[], temperature:temp, max_tokens:maxt, stream:!!opts.stream };
+    if(opts._extra) for(var _k in opts._extra){ var _v=opts._extra[_k]; if(_v!==null && _v!=='' && !isNaN(_v)) body[_k]=_v; }
+  }
+
+  /* Via relay: put the target URL in x-target and let the Worker forward it
+     The Key still comes from the browser; the Worker stores no Keys */
+  var proxy = ACCT.proxyUrl || '';
+  if(proxy){
+    headers['x-target'] = url;
+    headers['x-edge-proxy'] = '1';
+    url = proxy.replace(/\/+$/,'') + '/v1/chat/completions';
+  }
+
+  try{
+    var r = await fetch(url, { method:'POST', headers:headers, body:JSON.stringify(body), signal:ctl.signal });
+    if(!r.ok){
+      var t = await r.text().catch(function(){return ''});
+      clearTimeout(timer);
+      return {ok:false, err:diag(null, r.status, t, prov, model)};
+    }
+
+    /* ---- Stream ---- */
+    if(opts.stream){
+      var reader = r.body && r.body.getReader ? r.body.getReader() : null;
+      if(!reader){
+        /* No stream (rare) — fall back to reading it in one go */
+        var j = await r.json().catch(function(){return null});
+        clearTimeout(timer);
+        if(!j) return {ok:false, err:{title:'Parse failed', msg:'The response isn’t valid JSON.'}};
+        var txt = (j.content&&j.content[0]&&j.content[0].text) ||
+                  (j.choices&&j.choices[0]&&j.choices[0].message&&j.choices[0].message.content) || '';
+        return {ok:true, text:txt};
+      }
+      var dec = new TextDecoder('utf-8'), buf='', full='', raw='', done=false;
+      try{
+        while(!done){
+          var chunk = await reader.read();
+          if(chunk.done) break;
+          var piece = dec.decode(chunk.value, {stream:true});
+          buf += piece; raw += piece;
+          var lines = buf.split('\n');
+          buf = lines.pop();   /* The last chunk may be incomplete; keep it */
+          for(var i=0;i<lines.length;i++){
+            var ln = lines[i].trim();
+            if(!ln || ln.indexOf('data:')!==0) continue;
+            var payload = ln.slice(5).trim();
+            if(payload === '[DONE]'){ done=true; break; }
+            var delta='';
+            try{
+              var o = JSON.parse(payload);
+              if(o.type==='content_block_delta'){ delta = (o.delta&&o.delta.text)||''; }
+              else if(o.choices&&o.choices[0]){
+                var c=o.choices[0];
+                delta = (c.delta && c.delta.content) || c.text || '';
+              }
+            }catch(e){ continue }
+            if(delta){ full += delta; if(opts.onDelta) opts.onDelta(delta, full); }
+          }
+        }
+      }catch(e){
+        clearTimeout(timer);
+        if(/abort/i.test(String(e && e.name) + String(e && e.message)))
+          return {ok:true, text:full, aborted:true};
+        return {ok:false, err:{title:'Read interrupted', msg:String((e&&e.message)||e)}, partial:full};
+      }
+      clearTimeout(timer);
+      if(!full){
+        /* 有些Model/gateways don’t support SSE and return one complete JSON.
+           Parse it here as a fallback so users don’t see a confusing"Empty response"。 */
+        try{
+          var jz = JSON.parse(raw.trim());
+          var ft = (jz.choices && jz.choices[0] && jz.choices[0].message && jz.choices[0].message.content)
+                 || (jz.content && jz.content[0] && jz.content[0].text) || '';
+          if(ft) return {ok:true, text:ft, fellback:true};
+        }catch(e){}
+        return {ok:false, err:{title:'Empty response',
+          msg:'Got a response but couldn’t parse it.\n\nLikely: ① this model doesn’t support streaming — uncheck "Stream" and retry\n② the response isn’t standard OpenAI format'}};
+      }
+      return {ok:true, text:full};
+    }
+
+    /* ---- Non-streaming ---- */
+    var jj = await r.json().catch(function(){return null});
+    clearTimeout(timer);
+    if(!jj) return {ok:false, err:{title:'Parse failed', msg:'The response isn’t valid JSON.'}};
+    var out = (jj.content&&jj.content[0]&&jj.content[0].text) ||
+              (jj.choices&&jj.choices[0]&&jj.choices[0].message&&jj.choices[0].message.content) || '';
+    if(!out) return {ok:false, err:{title:'Empty response', msg:'Empty response. Response: '+JSON.stringify(jj).slice(0,200)}};
+    return {ok:true, text:out};
+
+  }catch(e){
+    clearTimeout(timer);
+    var nm = String((e&&e.name)||'');
+    if(/abort/i.test(nm) || /abort/i.test(String(e&&e.message)))
+      return {ok:false, err:{title:'Stopped', msg:'Stopped.'}, aborted:true};
+    return {ok:false, err:diag(e, null, null, prov, model)};
+  }
+}
+
+/* Rough token estimate (1 CJK char ≈ 1 token, 4 English chars ≈ 1 token)*/
+function estTokens(s){
+  if(!s) return 0;
+  var t=String(s);
+  var cn=(t.match(/[\u4e00-\u9fa5]/g)||[]).length;
+  var rest=t.length-cn;
+  return Math.ceil(cn + rest/4);
+}
+
+
+/* ============================================================
+   View 1: Chat
+   ============================================================ */
+var chatMsgs = [];      /* Conversation context (sent to the API) */
+var chatBusy = false;
+var chatCtl = null;
+
+function renderModelSelect(){
+  var sel = document.getElementById('chatModel');
+  if(!sel) return;
+  var cur = sel.value;
+  var html = '';
+  PROVIDERS.forEach(function(p){
+    var has = !!getKey(p.id);
+    (p.models||[]).forEach(function(m){
+      html += '<option value="'+esc(mkKey(p.id,m))+'"'+(has?'':' style="color:#5c6a77"')+'>'
+            + esc(p.name+' · '+m) + (has?'':'(no Key)') + '</option>';
+    });
+  });
+  (customProvs()||[]).forEach(function(p){
+    var has = !!getKey(p.id);
+    (p.models||[]).forEach(function(m){
+      html += '<option value="'+esc(mkKey(p.id,m))+'">'+esc(p.name+' · '+m)+(has?'':'(no Key)')+'</option>';
+    });
+  });
+  sel.innerHTML = html || '<option value="">Add one on the Keys page first</option>';
+  if(cur && sel.querySelector('option[value="'+cur+'"]')) sel.value = cur;
+  updateChatStat();
+}
+
+function updateChatStat(){
+  var el = document.getElementById('chatStat');
+  if(!el) return;
+  var n = 0;
+  PROVIDERS.forEach(function(p){ if(getKey(p.id)) n++; });
+  (customProvs()||[]).forEach(function(p){ if(getKey(p.id)) n++; });
+  el.textContent = n ? ('Configured '+n+' providers · context '+chatMsgs.length+' items') : 'No Keys configured yet';
+}
+
+function parseSel(v){
+  if(!v || v.indexOf('::')<0) return null;
+  var a = v.split('::');
+  return { prov: findProv(a[0]), model: a.slice(1).join('::') };
+}
+
+function msgBox(role, html, extra){
+  var box = document.getElementById('msgs');
+  if(!box) return null;
+  var d = document.createElement('div');
+  d.className = 'msg ' + role;
+  d.innerHTML = (extra?'<div class="who">'+extra+'</div>':'') + '<div class="md">' + html + '</div>';
+  box.appendChild(d);
+  box.scrollTop = box.scrollHeight;
+  return d;
+}
+
+function stamp(){
+  var d=new Date();
+  return ('0'+d.getHours()).slice(-2)+':'+('0'+d.getMinutes()).slice(-2);
+}
+
+async function sendChat(){
+  if(chatBusy) return;
+  var inp = document.getElementById('chatIn');
+  var txt = (inp && inp.value || '').trim();
+  if(!txt){ toast('Type something first'); return; }
+
+  var sel = parseSel((document.getElementById('chatModel')||{}).value);
+  if(!sel || !sel.prov){ toast('Pick a model first'); return; }
+  var _pay = await acctPreAsk(sel.prov.id);
+  if(!_pay || !_pay.ok){ toast((_pay&&_pay.msg)||'Cannot send'); return; }
+  if(!getKey(sel.prov.id) && !/localhost|127\.0\.0\.1/.test(sel.prov.base||'')){
+    toast('This provider has no Key yet');
+    go('keys', document.querySelector('.tab[data-v="keys"]'));
+    return;
+  }
+
+  inp.value = ''; inp.style.height='auto';
+  msgBox('me', esc(txt), esc('Me') + ' <span class="tm">'+stamp()+'</span>');
+  chatMsgs.push({role:'user', content:txt});
+
+  chatBusy = true;
+  chatCtl = new AbortController();
+  document.getElementById('sendBtn').style.display='none';
+  document.getElementById('stopBtn').style.display='';
+
+  var label = esc(sel.prov.name+' · '+sel.model);
+  var box = msgBox('ai', '<span class="spin"></span> Thinking…',
+                   label + ' <span class="tm">'+stamp()+'</span>');
+  var body = box.querySelector('.md');
+  var t0 = Date.now();
+  var acc = '';
+
+  var tempEl = document.getElementById('chatTemp');
+  var streamEl = document.getElementById('chatStream');
+
+  var r = await callAI(sel.prov, sel.model, {
+    messages: chatMsgs,
+    temperature: tempEl ? parseFloat(tempEl.value) : 0.7,
+    stream: !!(streamEl && streamEl.checked),
+    signal: chatCtl.signal,
+    onDelta: function(d, full){
+      acc = full;
+      body.innerHTML = md(full) + '<span class="cursor"></span>';
+      var m=document.getElementById('msgs'); if(m) m.scrollTop=m.scrollHeight;
+    }
+  });
+
+  var ms = Date.now()-t0;
+  chatBusy = false; chatCtl = null;
+  document.getElementById('sendBtn').style.display='';
+  document.getElementById('stopBtn').style.display='none';
+
+  if(r && r.ok){
+    var out = r.text || acc;
+    body.innerHTML = md(out);
+    chatMsgs.push({role:'assistant', content:out});
+    saveHist(chatMsgs);
+    var tk = estTokens(out);
+    var meta = document.createElement('div');
+    meta.style.cssText='font-size:9.5px;color:var(--dim2);margin-top:6px';
+    meta.textContent = (ms/1000).toFixed(1)+'s · about '+tk+' tokens' + (r.aborted?' · interrupted':'');
+    body.appendChild(meta);
+    updateChatStat();
+  }else{
+    var e = (r && r.err) || {title:'Something went wrong', msg:'Unknown error'};
+    body.innerHTML = '<div class="errbox"><b>'+esc(e.title)+'</b><br>'+esc(e.msg)+'</div>';
+    if(r && r.partial) acc = r.partial;
+  }
+  var m=document.getElementById('msgs'); if(m) m.scrollTop=m.scrollHeight;
+}
+
+function stopChat(){
+  if(chatCtl){ try{chatCtl.abort()}catch(e){} }
+  chatBusy = false;
+  var s=document.getElementById('sendBtn'), t=document.getElementById('stopBtn');
+  if(s) s.style.display=''; if(t) t.style.display='none';
+  toast('Stopped');
+}
+
+function clearChat(){
+  if(!confirm('Clear this conversation?')) return;
+  chatMsgs = []; saveHist([]);
+  var box=document.getElementById('msgs');
+  if(box) box.innerHTML='<div class="msg sys">Conversation cleared</div>';
+  updateChatStat();
+}
+
+function exportChat(){
+  if(!chatMsgs.length){ toast('No messages yet'); return; }
+  var s='';
+  chatMsgs.forEach(function(m){
+    s += (m.role==='user'?'【Me】':'【AI】') + '\n' + m.content + '\n\n';
+  });
+  copyText(s, 'Conversation copied');
+}
+
+function copyText(t, ok){
+  var done=function(){ toast(ok||'Copied') };
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText)
+      navigator.clipboard.writeText(t).then(done, function(){ fb(t); done(); });
+    else { fb(t); done(); }
+  }catch(e){ fb(t); done(); }
+  function fb(x){
+    try{
+      var ta=document.createElement('textarea'); ta.value=x;
+      ta.style.position='fixed'; ta.style.left='-9999px';
+      document.body.appendChild(ta); ta.select();
+      document.execCommand('copy'); document.body.removeChild(ta);
+    }catch(e){}
+  }
+}
+
+
+/* ============================================================
+   View 2: AI Arena
+   ============================================================ */
+var arenaSel = [];       /* ['pid::model', ...] */
+var arenaBusy = false;
+var arenaCtl = null;
+var arenaVotes = {};
+
+function renderArenaPick(){
+  var box = document.getElementById('arenaPick');
+  if(!box) return;
+  var html = '';
+  PROVIDERS.forEach(function(p){
+    var has = !!getKey(p.id);
+    (p.models||[]).forEach(function(m){
+      var k = mkKey(p.id, m);
+      html += '<button class="pick'+(arenaSel.indexOf(k)>=0?' on':'')+'" data-k="'+esc(k)+'"'
+            + ' onclick="togglePick(this)">'
+            + esc(p.name+' · '+m) + (has?'':' 🔒') + '</button>';
+    });
+  });
+  (customProvs()||[]).forEach(function(p){
+    var has = !!getKey(p.id);
+    (p.models||[]).forEach(function(m){
+      var k = mkKey(p.id, m);
+      html += '<button class="pick'+(arenaSel.indexOf(k)>=0?' on':'')+'" data-k="'+esc(k)+'"'
+            + ' onclick="togglePick(this)">'
+            + esc(p.name+' · '+m) + (has?'':' 🔒') + '</button>';
+    });
+  });
+  box.innerHTML = html || '<span style="font-size:11px;color:var(--dim2)">Configure it on the 🔑 Keys page first</span>';
+  var c=document.getElementById('arenaCount');
+  if(c) c.textContent = arenaSel.length ? ('selected '+arenaSel.length+' ') : '';
+}
+
+function togglePick(btn){
+  var k = btn.getAttribute('data-k');
+  if(!k) return;
+  var i = arenaSel.indexOf(k);
+  if(i >= 0){ arenaSel.splice(i,1); btn.classList.remove('on'); }
+  else{
+    if(arenaSel.length >= 4){ toast('4 at most, more than that is unreadable'); return; }
+    arenaSel.push(k); btn.classList.add('on');
+  }
+  var c=document.getElementById('arenaCount');
+  if(c) c.textContent = arenaSel.length ? ('selected '+arenaSel.length+' ') : '';
+  buildArenaGrid();
+}
+
+function buildArenaGrid(){
+  var g = document.getElementById('arenaGrid');
+  if(!g) return;
+  g.className = 'arena-grid ' + (arenaSel.length>=3 ? 'a3' : 'a2');
+  if(!arenaSel.length){
+    g.innerHTML = '<div class="empty">👆 Pick 2–4 models above, then hit Start duel</div>';
+    return;
+  }
+  g.innerHTML = arenaSel.map(function(k,i){
+    var s = parseSel(k);
+    var nm = s && s.prov ? esc(s.prov.name+' · '+s.model) : esc(k);
+    var voted = arenaVotes[k] ? ' on' : '';
+    return '<div class="fighter" id="f'+i+'">'
+      + '<div class="f-head"><div class="f-name">'+nm+'</div>'
+      + '<span class="f-stat" id="s'+i+'">Standby</span></div>'
+      + '<div class="f-body" id="b'+i+'"></div>'
+      + '<div class="f-foot">'
+      +   '<button class="vote'+voted+'" onclick="vote(\''+esc(k)+'\',this)">👍 This one’s better</button>'
+      +   '<button class="vote" onclick="copyOne('+i+')">📋</button>'
+      + '</div></div>';
+  }).join('');
+}
+
+async function runArena(){
+  if(arenaBusy) return;
+  var q = (document.getElementById('arenaQ')||{}).value || '';
+  q = q.trim();
+  if(!q){ toast('Enter a question to compare first'); return; }
+  if(arenaSel.length < 1){ toast('Select at least 1 model'); return; }
+
+  /* Filter out the ones with no Key filled in */
+  var usable = arenaSel.filter(function(k){
+    var s = parseSel(k);
+    if(!s || !s.prov) return false;
+    return !!getKey(s.prov.id) || /localhost|127\.0\.0\.1/.test(s.prov.base||'');
+  });
+  if(!usable.length){
+    toast('None of the selected models have a Key');
+    go('keys', document.querySelector('.tab[data-v="keys"]'));
+    return;
+  }
+
+  arenaBusy = true;
+  arenaCtl = new AbortController();
+  var btn = document.getElementById('arenaGo');
+  if(btn){ btn.disabled=true; btn.textContent='⏳ Duelling…'; }
+  var st = document.getElementById('arenaStat');
+  if(st) st.textContent = usable.length+'  models are answering at once…';
+
+  buildArenaGrid();   /* Reset to empty slots */
+
+  var tempEl = document.getElementById('chatTemp');
+  var temp = tempEl ? parseFloat(tempEl.value) : 0.7;
+
+  /* Fire in parallel */
+  var jobs = usable.map(function(k, i){
+    var s = parseSel(k);
+    var bodyEl = document.getElementById('b'+i);
+    var statEl = document.getElementById('s'+i);
+    if(statEl) statEl.textContent = '⏳ Generating';
+    var t0 = Date.now();
+    return callAI(s.prov, s.model, {
+      messages: [{role:'user', content:q}],
+      temperature: temp,
+      stream: true,
+      signal: arenaCtl.signal,
+      onDelta: function(d, full){
+        if(bodyEl){
+          bodyEl.innerHTML = md(full) + '<span class="cursor"></span>';
+          bodyEl.scrollTop = bodyEl.scrollHeight;
+        }
+      }
+    }).then(function(r){
+      var ms = Date.now()-t0;
+      var f = document.getElementById('f'+i);
+      if(r && r.ok){
+        if(bodyEl) bodyEl.innerHTML = md(r.text||'');
+        if(statEl) statEl.textContent = (ms/1000).toFixed(1)+'s · ~'+estTokens(r.text||'')+' tok';
+        if(f) f.dataset.done='1';
+        return {k:k, ok:true, ms:ms, text:r.text||''};
+      }else{
+        var e = (r && r.err) || {title:'Error', msg:'?'};
+        if(bodyEl) bodyEl.innerHTML = '<div class="errbox"><b>'+esc(e.title)+'</b><br>'+esc(e.msg)+'</div>';
+        if(statEl) statEl.textContent = '❌ Failed';
+        return {k:k, ok:false, ms:ms, err:e};
+      }
+    });
+  });
+
+  var res = await Promise.all(jobs);
+
+  arenaBusy = false; arenaCtl = null;
+  if(btn){ btn.disabled=false; btn.textContent='⚔️ Rematch'; }
+  var okN = res.filter(function(x){return x.ok}).length;
+  if(st) st.textContent = 'done · ok '+okN+'/'+res.length
+    + (okN>1 ? (' · fastest '+Math.min.apply(null, res.filter(function(x){return x.ok}).map(function(x){return x.ms}))+'ms') : '');
+}
+
+function vote(k, btn){
+  arenaVotes = {};
+  arenaVotes[k] = 1;
+  var all = document.querySelectorAll('.vote');
+  for(var i=0;i<all.length;i++) all[i].classList.remove('on');
+  btn.classList.add('on');
+  var fighters = document.querySelectorAll('.fighter');
+  for(var j=0;j<fighters.length;j++) fighters[j].classList.remove('win');
+  var p = btn.closest ? btn.closest('.fighter') : null;
+  if(p) p.classList.add('win');
+  toast('Voted 👍');
+}
+
+function copyOne(i){
+  var b = document.getElementById('b'+i);
+  if(!b) return;
+  copyText(b.innerText || '', 'Answer copied');
+}
+
+function copyArena(){
+  var q = ((document.getElementById('arenaQ')||{}).value||'').trim();
+  if(!q){ toast('Nothing here yet'); return; }
+  var s = '[Question]\n' + q + '\n\n';
+  arenaSel.forEach(function(k, i){
+    var sel = parseSel(k);
+    var nm = sel && sel.prov ? (sel.prov.name+' · '+sel.model) : k;
+    var b = document.getElementById('b'+i);
+    s += '── ' + nm + ' ──\n' + ((b && b.innerText) || '(empty)') + '\n\n';
+  });
+  copyText(s, 'All comparisons copied');
+}
+
+function clearArena(){
+  arenaSel = []; arenaVotes = {};
+  var q=document.getElementById('arenaQ'); if(q) q.value='';
+  var st=document.getElementById('arenaStat'); if(st) st.textContent='';
+  var btn=document.getElementById('arenaGo'); if(btn) btn.textContent='⚔️ Start duel';
+  renderArenaPick(); buildArenaGrid();
+}
+
+
+/* ============================================================
+   View 3: AI Tools — runs fully local, no network, no cost
+   ============================================================ */
+var TOOLS = [
+  { id:'token', icon:'🔢', name:'Token Estimate', desc:'Estimate token count and call cost',
+    render:function(c){
+      c.innerHTML =
+        '<textarea id="tkIn" placeholder="Paste text…" style="min-height:100px"></textarea>'
+      + '<div class="row" style="margin:9px 0">'
+      +   '<span style="font-size:11px;color:var(--dim)">Price (¥ / million tokens)</span>'
+      +   '<input id="tkPrice" type="number" value="1" step="0.1" style="width:90px">'
+      +   '<button class="btn sm" onclick="runTool(\'token\')">Compute</button>'
+      + '</div>'
+      + '<div id="tkOut" class="toolbox-out"></div>';
+    },
+    run:function(){
+      var t=(document.getElementById('tkIn')||{}).value||'';
+      var pr=parseFloat((document.getElementById('tkPrice')||{}).value)||0;
+      var n=estTokens(t);
+      var chars=t.length, cn=(t.match(/[\u4e00-\u9fa5]/g)||[]).length;
+      var lines=t?t.split('\n').length:0;
+      var cost=n/1000000*pr;
+      document.getElementById('tkOut').textContent =
+        'Characters  '+chars+'\nCJK chars   '+cn+'\nLines       '+lines
+        +'\n\nEstimated tokens  ≈ '+n
+        +'\n(1 CJK char ≈ 1 token, others ≈ 1 token per 4 chars)'
+        +'\n\nCost per call    ≈ ¥'+cost.toFixed(6)
+        +'\n1000 calls       ≈ ¥'+(cost*1000).toFixed(4);
+    }
+  },
+  { id:'prompt', icon:'📝', name:'Prompt Templates', desc:'Common prompt templates — click to copy',
+    render:function(c){
+      var T=[
+        ['Translate & Polish','You are a senior translator. Translate the following into {language}, keeping the meaning with a natural tone — don’t translate word for word.\n\n{content}'],
+        ['Code Review','Review the code below and point out: 1) bugs 2) performance issues 3) security risks 4) improvements. Answer in English, sorted by severity.\n\n```\n{code}\n```'],
+        ['Name Generator','Give 10 names for {description}. Requirements: short, memorable, catchy and suited to {scenario}. Add a one-line reason after each name.'],
+        ['Summarize','Summarize the following in under {words} words. Keep the key points, drop the filler.\n\n{content}'],
+        ['Explain a Concept','Explain {concept} with the Feynman technique: start with a real-life analogy, then the core principle, then common misconceptions.'],
+        ['Expand Writing','Expand the text below to about {words} words. Keep the original viewpoint and tone, and add concrete examples.\n\n{content}'],
+        ['Role Play','You are now {role}. Answer my question as that character — tone, wording and mindset should all match.\n\nMy question: {question}'],
+        ['SQL Generator','The database is {dbType}. Write SQL for the schema and requirement below. Output SQL only, no explanation.\n\nSchema: {schema}\nRequirement: {requirement}']
+      ];
+      var h='<div style="font-size:11px;color:var(--dim);margin-bottom:8px">Click "Copy" to take the template, then swap {placeholder} for your own content</div>';
+      T.forEach(function(p,i){
+        h += '<div style="border:1px solid var(--line);border-radius:9px;padding:10px;margin-bottom:8px;background:var(--panel2)">'
+          + '<div class="row" style="margin-bottom:6px"><b style="font-size:12px">'+esc(p[0])+'</b>'
+          + '<button class="btn sm" style="margin-left:auto" onclick="copyPrompt('+i+')">📋 Copy</button></div>'
+          + '<div style="font-family:var(--mono);font-size:10.5px;color:var(--dim);white-space:pre-wrap;line-height:1.6">'+esc(p[1])+'</div>'
+          + '</div>';
+      });
+      c.innerHTML=h;
+      window._prompts=T;
+    }
+  },
+  { id:'json', icon:'{}', name:'JSON Formatter', desc:'Beautify / minify / validate JSON',
+    render:function(c){
+      c.innerHTML =
+        '<textarea id="jsIn" placeholder=\'Paste JSON, e.g. {"a":1}\' style="min-height:110px;font-family:var(--mono);font-size:11.5px"></textarea>'
+      + '<div class="row" style="margin:9px 0">'
+      +   '<button class="btn sm" onclick="runTool(\'json\')">Beautify</button>'
+      +   '<button class="btn sm" onclick="jsonMin()">Minify</button>'
+      +   '<button class="btn sm" onclick="jsonCopy()">📋 Copy result</button>'
+      + '</div><div id="jsOut" class="toolbox-out"></div>';
+    },
+    run:function(){
+      var v=(document.getElementById('jsIn')||{}).value||'';
+      var o=document.getElementById('jsOut');
+      try{
+        o.textContent = JSON.stringify(JSON.parse(v), null, 2);
+        o.style.color='var(--green)';
+      }catch(e){
+        o.textContent = '❌ Not valid JSON:\n' + e.message;
+        o.style.color='var(--red)';
+      }
+    }
+  },
+  { id:'b64', icon:'🔐', name:'Base64', desc:'Encode / decode, CJK supported',
+    render:function(c){
+      c.innerHTML =
+        '<textarea id="bIn" placeholder="Enter text or Base64…" style="min-height:90px"></textarea>'
+      + '<div class="row" style="margin:9px 0">'
+      +   '<button class="btn sm" onclick="b64(1)">Encode →</button>'
+      +   '<button class="btn sm" onclick="b64(0)">← Decode</button>'
+      + '</div><div id="bOut" class="toolbox-out"></div>';
+    }
+  },
+  { id:'urlc', icon:'🔗', name:'URL Encode / Decode', desc:'encodeURIComponent, both directions',
+    render:function(c){
+      c.innerHTML =
+        '<textarea id="uIn" placeholder="Enter a URL or an encoded string…" style="min-height:80px"></textarea>'
+      + '<div class="row" style="margin:9px 0">'
+      +   '<button class="btn sm" onclick="urlc(1)">Encode →</button>'
+      +   '<button class="btn sm" onclick="urlc(0)">← Decode</button>'
+      + '</div><div id="uOut" class="toolbox-out"></div>';
+    }
+  },
+  { id:'regex', icon:'🔍', name:'Regex Tester', desc:'Live regex match testing',
+    render:function(c){
+      c.innerHTML =
+        '<div class="row" style="margin-bottom:8px">'
+      +   '<input id="rxP" placeholder="Pattern, e.g. \\d+" style="flex:1;font-family:var(--mono);font-size:12px">'
+      +   '<input id="rxF" placeholder="Flags g i m" value="g" style="width:80px;font-family:var(--mono)">'
+      + '</div>'
+      + '<textarea id="rxT" placeholder="Test text…" style="min-height:80px"></textarea>'
+      + '<button class="btn sm" style="margin:9px 0" onclick="runTool(\'regex\')">Test</button>'
+      + '<div id="rxOut" class="toolbox-out"></div>';
+    },
+    run:function(){
+      var p=(document.getElementById('rxP')||{}).value||'';
+      var f=(document.getElementById('rxF')||{}).value||'';
+      var t=(document.getElementById('rxT')||{}).value||'';
+      var o=document.getElementById('rxOut');
+      if(!p){ o.textContent='Enter a regex first'; return; }
+      try{
+        var re=new RegExp(p,f);
+        var m=t.match(re), all=t.match(new RegExp(p, f.indexOf('g')>=0?f:f+'g'));
+        if(!all){ o.textContent='No matches'; o.style.color='var(--dim)'; return; }
+        o.style.color='';
+        o.textContent='matched '+all.length+' matches:\n\n'
+          + all.slice(0,50).map(function(x,i){ return '['+i+'] '+JSON.stringify(x); }).join('\n')
+          + (all.length>50?'\n… showing the first 50 ':'');
+      }catch(e){ o.textContent='❌ Invalid regex: '+e.message; o.style.color='var(--red)'; }
+    }
+  },
+  { id:'time', icon:'⏰', name:'Timestamp Converter', desc:'Unix timestamp ↔ date',
+    render:function(c){
+      c.innerHTML =
+        '<div class="row" style="margin-bottom:8px">'
+      +   '<input id="tmIn" placeholder="Timestamp or date, blank = now" style="flex:1">'
+      +   '<button class="btn sm" onclick="runTool(\'time\')">Convert</button>'
+      + '</div><div id="tmOut" class="toolbox-out"></div>';
+    },
+    run:function(){
+      var v=((document.getElementById('tmIn')||{}).value||'').trim();
+      var d;
+      if(!v) d=new Date();
+      else if(/^\d{10}$/.test(v)) d=new Date(parseInt(v,10)*1000);
+      else if(/^\d{13}$/.test(v)) d=new Date(parseInt(v,10));
+      else d=new Date(v);
+      var o=document.getElementById('tmOut');
+      if(isNaN(d.getTime())){ o.textContent='❌ Can’t parse this format. Try: 1700000000 / 1700000000000 / 2026-10-16'; o.style.color='var(--red)'; return; }
+      o.style.color='';
+      var p=function(n){return ('0'+n).slice(-2)};
+      o.textContent =
+        'second timestamp  '+Math.floor(d.getTime()/1000)
+        +'\nMilliseconds  '+d.getTime()
+        +'\nLocal time    '+d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())
+          +' '+p(d.getHours())+':'+p(d.getMinutes())+':'+p(d.getSeconds())
+        +'\nUTC time      '+d.toISOString().replace('T',' ').slice(0,19)
+        +'\n\nNow (seconds)   '+Math.floor(Date.now()/1000);
+    }
+  },
+  { id:'uuid', icon:'🎲', name:'UUID / Random', desc:'Generate UUIDs, random strings and passwords',
+    render:function(c){
+      c.innerHTML =
+        '<div class="row" style="margin-bottom:8px">'
+      +   '<button class="btn sm" onclick="genUuid()">Generate UUID</button>'
+      +   '<button class="btn sm" onclick="genPwd()">Strong password</button>'
+      +   '<input id="uuN" type="number" value="5" min="1" max="50" style="width:70px">'
+      +   '<span style="font-size:11px;color:var(--dim)"> chars</span>'
+      + '</div><div id="uuOut" class="toolbox-out"></div>';
+    }
+  },
+  { id:'hash', icon:'#️⃣', name:'Hash', desc:'SHA-1/256/512 (local Web Crypto)',
+    render:function(c){
+      c.innerHTML =
+        '<textarea id="hsIn" placeholder="Enter text to hash…" style="min-height:70px"></textarea>'
+      + '<button class="btn sm" style="margin:9px 0" onclick="runHash()">Compute</button>'
+      + '<div id="hsOut" class="toolbox-out"></div>';
+    }
+  },
+  { id:'text', icon:'🔤', name:'Text Tools', desc:'Stats / upper-lower case / dedupe / sort',
+    render:function(c){
+      c.innerHTML =
+        '<textarea id="txIn" placeholder="Enter text…" style="min-height:100px"></textarea>'
+      + '<div class="row" style="margin:9px 0;gap:6px">'
+      +   '<button class="btn sm" onclick="runTool(\'text\')">Stats</button>'
+      +   '<button class="btn sm" onclick="txOp(\'upper\')">Uppercase</button>'
+      +   '<button class="btn sm" onclick="txOp(\'lower\')">Lowercase</button>'
+      +   '<button class="btn sm" onclick="txOp(\'dedup\')">Dedupe lines</button>'
+      +   '<button class="btn sm" onclick="txOp(\'sort\')">Sort lines</button>'
+      +   '<button class="btn sm" onclick="txOp(\'trim\')">Drop empty lines</button>'
+      + '</div><div id="txOut" class="toolbox-out"></div>';
+    },
+    run:function(){
+      var t=(document.getElementById('txIn')||{}).value||'';
+      var cn=(t.match(/[\u4e00-\u9fa5]/g)||[]).length;
+      var en=(t.match(/[a-zA-Z]+/g)||[]).length;
+      var lines=t?t.split('\n'):[];
+      var nonEmpty=lines.filter(function(x){return x.trim()}).length;
+      document.getElementById('txOut').textContent =
+        'Chars (w/ spaces)'+t.length
+        +'\nChars (no spaces)'+t.replace(/\s/g,'').length
+        +'\nCJK chars      '+cn
+        +'\nEnglish words  '+en
+        +'\nLines          '+lines.length+'(non-empty '+nonEmpty+'）'
+        +'\nEst. tokens    '+estTokens(t)
+        +'\nBytes (UTF-8)  '+new Blob([t]).size;
+    }
+  },
+  { id:'color', icon:'🎨', name:'Color Converter', desc:'HEX ↔ RGB ↔ HSL with live preview',
+    render:function(c){
+      c.innerHTML =
+        '<div class="row" style="margin-bottom:8px">'
+      +   '<input id="clIn" placeholder="#7fe6ff or rgb(127,230,255)" value="#7fe6ff" style="flex:1;font-family:var(--mono)">'
+      +   '<button class="btn sm" onclick="runTool(\'color\')">Convert</button>'
+      + '</div>'
+      + '<div id="clPrev" style="height:44px;border-radius:8px;border:1px solid var(--line);margin-bottom:8px"></div>'
+      + '<div id="clOut" class="toolbox-out"></div>';
+    },
+    run:function(){
+      var v=((document.getElementById('clIn')||{}).value||'').trim();
+      var o=document.getElementById('clOut'), pv=document.getElementById('clPrev');
+      var rgb=null;
+      var m1=v.match(/^#?([0-9a-f]{6})$/i);
+      var m2=v.match(/^#?([0-9a-f]{3})$/i);
+      var m3=v.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+      if(m1){ rgb=[parseInt(m1[1].slice(0,2),16),parseInt(m1[1].slice(2,4),16),parseInt(m1[1].slice(4,6),16)]; }
+      else if(m2){ rgb=[parseInt(m2[1][0]+m2[1][0],16),parseInt(m2[1][1]+m2[1][1],16),parseInt(m2[1][2]+m2[1][2],16)]; }
+      else if(m3){ rgb=[+m3[1],+m3[2],+m3[3]]; }
+      if(!rgb){ o.textContent='❌ Can’t parse that. Supported: #7fe6ff / 7fe6ff / #7fe / rgb(127,230,255)'; o.style.color='var(--red)'; return; }
+      o.style.color=''; pv.style.background='rgb('+rgb.join(',')+')';
+      var hx='#'+rgb.map(function(x){return ('0'+x.toString(16)).slice(-2)}).join('');
+      var r=rgb[0]/255,g=rgb[1]/255,b=rgb[2]/255;
+      var mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn,h=0,s=0,l=(mx+mn)/2;
+      if(d){
+        s = l>0.5 ? d/(2-mx-mn) : d/(mx+mn);
+        if(mx===r) h=((g-b)/d+(g<b?6:0));
+        else if(mx===g) h=(b-r)/d+2;
+        else h=(r-g)/d+4;
+        h*=60;
+      }
+      o.textContent =
+        'HEX  '+hx.toUpperCase()
+        +'\nRGB  rgb('+rgb.join(', ')+')'
+        +'\nHSL  hsl('+Math.round(h)+', '+Math.round(s*100)+'%, '+Math.round(l*100)+'%)'
+        +'\n\nLightness '+Math.round(((rgb[0]*299+rgb[1]*587+rgb[2]*114)/1000))
+        +'  '+(l>0.5?'(light — pair with dark text)':'(dark — pair with light text)');
+    }
+  },
+  { id:'mdprev', icon:'📄', name:'Markdown Preview', desc:'Live Markdown preview',
+    render:function(c){
+      c.innerHTML =
+        '<textarea id="mdIn" placeholder="# Heading\n**bold** and `code`\n- list item" style="min-height:110px;font-family:var(--mono);font-size:11.5px"></textarea>'
+      + '<button class="btn sm" style="margin:9px 0" onclick="runTool(\'mdprev\')">Preview</button>'
+      + '<div id="mdOut" class="md" style="background:#05080c;border:1px solid var(--line);border-radius:8px;padding:11px;min-height:60px;font-size:12.5px"></div>';
+    },
+    run:function(){
+      var v=(document.getElementById('mdIn')||{}).value||'';
+      document.getElementById('mdOut').innerHTML = md(v) || '<span style="color:var(--dim2)">(empty)</span>';
+    }
+  }
+];
+
+/* ---------- Tool dispatch ---------- */
+var curTool = null;
+
+function renderToolList(){
+  var box = document.getElementById('toolList');
+  if(!box) return;
+  box.innerHTML = TOOLS.map(function(t){
+    return '<button class="tool" onclick="openTool(\''+t.id+'\')">'
+      + '<div class="tool-ico">'+t.icon+'</div>'
+      + '<div class="tool-name">'+esc(t.name)+'</div>'
+      + '<div class="tool-desc">'+esc(t.desc)+'</div></button>';
+  }).join('');
+}
+
+function openTool(id){
+  var t = TOOLS.filter(function(x){return x.id===id})[0];
+  if(!t) return;
+  curTool = t;
+  document.getElementById('toolList').style.display='none';
+  var p = document.getElementById('toolPanel');
+  p.style.display=''; p.innerHTML='';
+  document.getElementById('toolTitle').textContent = t.icon+' '+t.name;
+  if(t.render) t.render(p);
+}
+
+function backTools(){
+  curTool = null;
+  document.getElementById('toolPanel').style.display='none';
+  document.getElementById('toolList').style.display='';
+  document.getElementById('toolTitle').textContent='';
+}
+
+function runTool(id){
+  var t = TOOLS.filter(function(x){return x.id===id})[0];
+  if(t && t.run) t.run();
+}
+
+/* ---------- Per-tool functions ---------- */
+function copyPrompt(i){
+  var p = (window._prompts||[])[i];
+  if(p) copyText(p[1], 'Copied 「'+p[0]+'" template');
+}
+function jsonMin(){
+  var v=(document.getElementById('jsIn')||{}).value||'';
+  var o=document.getElementById('jsOut');
+  try{ o.textContent=JSON.stringify(JSON.parse(v)); o.style.color='var(--green)'; }
+  catch(e){ o.textContent='❌ '+e.message; o.style.color='var(--red)'; }
+}
+function jsonCopy(){
+  var o=document.getElementById('jsOut');
+  if(o && o.textContent) copyText(o.textContent,'Copied');
+}
+function b64(enc){
+  var v=(document.getElementById('bIn')||{}).value||'';
+  var o=document.getElementById('bOut');
+  try{
+    o.textContent = enc
+      ? btoa(unescape(encodeURIComponent(v)))
+      : decodeURIComponent(escape(atob(v.replace(/\s/g,''))));
+    o.style.color='';
+  }catch(e){ o.textContent='❌ '+(enc?'Encode':'Decode')+'Failed: '+e.message+'\n(For decoding, make sure the input is valid Base64)'; o.style.color='var(--red)'; }
+}
+function urlc(enc){
+  var v=(document.getElementById('uIn')||{}).value||'';
+  var o=document.getElementById('uOut');
+  try{ o.textContent = enc?encodeURIComponent(v):decodeURIComponent(v.replace(/\+/g,' ')); o.style.color=''; }
+  catch(e){ o.textContent='❌ '+e.message; o.style.color='var(--red)'; }
+}
+function genUuid(){
+  var n=Math.max(1,Math.min(50,parseInt((document.getElementById('uuN')||{}).value||'5',10)));
+  var out=[];
+  for(var i=0;i<n;i++){
+    out.push((crypto.randomUUID && crypto.randomUUID())
+      ? crypto.randomUUID()
+      : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,function(c){
+          var r=Math.random()*16|0, v=c==='x'?r:(r&0x3|0x8); return v.toString(16);
+        }));
+  }
+  document.getElementById('uuOut').textContent=out.join('\n');
+}
+function genPwd(){
+  var n=Math.max(1,Math.min(50,parseInt((document.getElementById('uuN')||{}).value||'5',10)));
+  var C='ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%^&*';
+  var out=[];
+  for(var i=0;i<n;i++){
+    var s='';
+    var a=new Uint32Array(16); crypto.getRandomValues(a);
+    for(var j=0;j<16;j++) s+=C[a[j]%C.length];
+    out.push(s);
+  }
+  document.getElementById('uuOut').textContent=out.join('\n');
+}
+async function runHash(){
+  var v=(document.getElementById('hsIn')||{}).value||'';
+  var o=document.getElementById('hsOut');
+  if(!v){ o.textContent='Enter some text first'; return; }
+  o.textContent='Computing…';
+  var buf=new TextEncoder().encode(v);
+  var out=[];
+  for(var alg of ['SHA-1','SHA-256','SHA-512']){
+    try{
+      var d=await crypto.subtle.digest(alg, buf);
+      var h=[].slice.call(new Uint8Array(d)).map(function(b){return ('0'+b.toString(16)).slice(-2)}).join('');
+      out.push(alg.padEnd(8)+' '+h);
+    }catch(e){ out.push(alg+' Failed'); }
+  }
+  o.textContent=out.join('\n\n');
+}
+function txOp(op){
+  var el=document.getElementById('txIn');
+  if(!el) return;
+  var t=el.value||'';
+  if(op==='upper') t=t.toUpperCase();
+  else if(op==='lower') t=t.toLowerCase();
+  else if(op==='dedup'){ var seen={}; t=t.split('\n').filter(function(x){ if(seen[x])return false; seen[x]=1; return true }).join('\n'); }
+  else if(op==='sort') t=t.split('\n').sort().join('\n');
+  else if(op==='trim') t=t.split('\n').filter(function(x){return x.trim()}).join('\n');
+  el.value=t;
+  runTool('text');
+}
+
+
+/* ============================================================
+   View 4: Keys / View switching / Init
+   ============================================================ */
+
+/* ---------- Key cards ---------- */
+function renderProvList(){
+  var box = document.getElementById('provList');
+  if(!box) return;
+  var html = PROVIDERS.map(function(p){
+    var v = getKey(p.id);
+    var bc = p.cors==='ok' ? 'b-cors' : (p.cors==='warn' ? 'b-warn' : 'b-off');
+    var bt = p.cors==='ok' ? 'Direct OK' : (p.cors==='warn' ? 'Needs setup' : 'Needs relay');
+    return '<div class="prov'+(v?' on':'')+'">'
+      + '<div class="prov-top">'
+      +   '<div class="prov-ico">'+p.icon+'</div>'
+      +   '<div class="prov-name">'+esc(p.name)+'</div>'
+      +   (p.free?'<span class="badge b-free">Has free</span>':'')
+      +   '<span class="badge '+bc+'">'+bt+'</span>'
+      +   (v?'<span class="badge b-ok">✓</span>':'')
+      + '</div>'
+      + '<div class="prov-desc">'+esc(p.desc)+'</div>'
+      + '<input class="key-input" type="password" placeholder="API Key (blank = none)" value="'+esc(v)+'"'
+      +   ' oninput="onProvInput(this,\''+p.id+'\')" onblur="onProvBlur()" autocomplete="off">'
+      + '<div class="row" style="margin-top:7px;gap:5px">'
+      +   '<a class="btn sm" href="'+esc(p.keyUrl)+'" target="_blank" rel="noopener">Get one</a>'
+      +   '<button class="btn sm" onclick="testKey(\''+p.id+'\')">Test</button>'
+      +   '<button class="btn sm" onclick="toggleShow(this)">👁</button>'
+      + '</div>'
+      + '<div class="prov-note">'+esc(p.note||'')+'</div>'
+      + '</div>';
+  }).join('');
+  box.innerHTML = html;
+}
+
+function renderCustomList(){
+  var box = document.getElementById('cuList');
+  if(!box) return;
+  var arr = customProvs() || [];
+  if(!arr.length){ box.innerHTML=''; return; }
+  box.innerHTML = '<div class="sep"></div>' + arr.map(function(p,i){
+    return '<div class="prov"><div class="prov-top">'
+      + '<div class="prov-ico">⚙️</div><div class="prov-name">'+esc(p.name)+'</div>'
+      + '<span class="badge b-cors">Custom</span></div>'
+      + '<div class="prov-desc" style="min-height:auto;font-family:var(--mono);font-size:9.5px">'
+      + esc(p.base)+'<br>Model：'+esc((p.models||[]).join(', '))+'</div>'
+      + '<div class="row" style="margin-top:7px;gap:5px">'
+      + '<button class="btn sm" onclick="testKey(\''+esc(p.id)+'\')">Test</button>'
+      + '<button class="btn sm dan" onclick="delCustom('+i+')">Delete</button></div></div>';
+  }).join('');
+}
+
+
+/* Live feedback when typing a Key: only swap the class, don’t re-render (or the input loses focus) */
+function onProvInput(el, pid){
+  setKey(pid, el.value);
+  var card = el.closest ? el.closest('.prov') : null;
+  if(card){
+    if(el.value.trim()) card.classList.add('on');
+    else card.classList.remove('on');
+    /* ✓ mark */
+    var b = card.querySelector('.b-ok');
+    if(el.value.trim() && !b){
+      var s2=document.createElement('span');
+      s2.className='badge b-ok'; s2.textContent='✓';
+      var top=card.querySelector('.prov-top');
+      if(top) top.appendChild(s2);
+    }else if(!el.value.trim() && b){ b.parentNode.removeChild(b); }
+  }
+  updateChatStat();
+}
+
+/* When the input loses focus, refresh the dropdown/Arena（此时重渲染不会打断输入） */
+function onProvBlur(){
+  renderModelSelect();
+  renderArenaPick();
+  updateChatStat();
+}
+
+function toggleShow(btn){
+  var card = btn.closest ? btn.closest('.prov') : null;
+  var inp = card ? card.querySelector('.key-input') : null;
+  if(!inp) return;
+  if(inp.type==='password'){ inp.type='text'; btn.textContent='🙈'; }
+  else{ inp.type='password'; btn.textContent='👁'; }
+}
+
+function addCustom(){
+  var n=(document.getElementById('cuName')||{}).value||'';
+  var b=(document.getElementById('cuBase')||{}).value||'';
+  var k=(document.getElementById('cuKey')||{}).value||'';
+  var m=(document.getElementById('cuModel')||{}).value||'';
+  n=n.trim(); b=b.trim().replace(/\/+$/,''); k=k.trim(); m=m.trim();
+  if(!n||!b||!m){ toast('Name, Base URL and model are all required'); return; }
+  if(!/^https?:\/\//i.test(b)){ toast('Base URL must start with http:// or https://'); return; }
+  var models = m.split(',').map(function(x){return x.trim()}).filter(Boolean);
+  var id = 'cu_' + Date.now().toString(36);
+  var arr = customProvs() || [];
+  arr.push({id:id, name:n, icon:'⚙️', base:b, models:models, cors:'ok', desc:'Custom OpenAI-compatible endpoint', note:'', free:false, custom:true});
+  saveCustom(arr);
+  if(k) setKey(id, k);
+  ['cuName','cuBase','cuKey','cuModel'].forEach(function(i){ var e=document.getElementById(i); if(e) e.value=''; });
+  toast('Added '+n);
+  renderCustomList(); renderModelSelect(); renderArenaPick();
+}
+
+function delCustom(i){
+  var arr = customProvs() || [];
+  if(i<0||i>=arr.length) return;
+  if(!confirm('Delete 「'+arr[i].name+'」？')) return;
+  setKey(arr[i].id, '');
+  arr.splice(i,1); saveCustom(arr);
+  renderCustomList(); renderModelSelect(); renderArenaPick();
+}
+
+/* ---------- Test Key: verify with a minimal request ---------- */
+async function testKey(pid){
+  var p = findProv(pid);
+  if(!p){ toast('Provider not found'); return; }
+  var k = getKey(pid);
+  if(!k){ toast('No Key for this one yet'); return; }
+  toast('Testing…');
+  var model = (p.models||[])[0];
+  var r = await callAI(p, model, {
+    messages:[{role:'user',content:'hi'}],
+    maxTokens:1, temperature:0, stream:false, timeout:25000
+  });
+  if(r && r.ok) toast('✅ '+p.name+' available');
+  else {
+    var e=(r&&r.err)||{title:'Failed',msg:'?'};
+    toast('❌ '+e.title);
+    showErr(p.name+' test failed', e.title+'\n\n'+e.msg);
+  }
+}
+
+async function testAllKeys(){
+  var list = PROVIDERS.filter(function(p){ return !!getKey(p.id) });
+  (customProvs()||[]).forEach(function(p){ if(getKey(p.id)) list.push(p); });
+  if(!list.length){ toast('No Keys filled in yet'); return; }
+  toast('Testing '+list.length+' providers…');
+  var ok=0, bad=[];
+  for(var i=0;i<list.length;i++){
+    var p=list[i];
+    var r = await callAI(p, (p.models||[])[0], {
+      messages:[{role:'user',content:'hi'}], maxTokens:1, temperature:0, stream:false, timeout:20000
+    });
+    if(r && r.ok) ok++; else bad.push(p.name+': '+(((r&&r.err)||{}).title||'Failed'));
+  }
+  showErr('Test result',
+    '✓ Available '+ok+' / '+list.length
+    + (bad.length ? ('\n\n❌ Failed：\n'+bad.join('\n')) : '\n\nAll passed 🎉'));
+}
+
+function clearAllKeys(){
+  if(!confirm('Clear all API Keys? Custom providers are deleted too.')) return;
+  var s=store();
+  if(s){ try{ s.removeItem('edge_ai_keys'); s.removeItem('edge_ai_custom'); }catch(e){} }
+  toast('Cleared');
+  renderProvList(); renderCustomList(); renderModelSelect(); renderArenaPick(); updateChatStat();
+}
+
+/* ---------- Modal ---------- */
+function showErr(title, msg){
+  var box=document.getElementById('modalBox');
+  if(!box) return;
+  box.innerHTML='<h3>'+esc(title)+'</h3><div class="errbox" style="white-space:pre-wrap">'+esc(msg)+'</div>'
+    +'<div class="row" style="margin-top:12px"><button class="btn pri" onclick="closeModal()">Got it</button></div>';
+  document.getElementById('mask').classList.add('on');
+}
+function closeModal(){ document.getElementById('mask').classList.remove('on'); }
+
+function openHelp(){
+  var box=document.getElementById('modalBox');
+  if(!box) return;
+  box.innerHTML =
+    '<h3>❓ How to use EDGE AI STUDIO</h3>'
+  + '<div style="font-size:12.5px;line-height:1.85">'
+  + '<b style="color:var(--cyan)">Step 1: add a Key</b><br>'
+  + 'Go to the 🔑 Keys page, pick one or two providers you already have and paste your API Key. If you have none, start with'
+  + ' <b>Tencent Hunyuan</b> (lite is free forever) or <b>SiliconFlow</b>.<br><br>'
+  + '<b style="color:var(--cyan)">Step 2: start chatting</b><br>'
+  + 'Head back to 💬 Chat, pick a model and just ask. Every model shares one screen — switching needs no re-configuring.<br><br>'
+  + '<b style="color:var(--cyan)">What’s Arena for</b><br>'
+  + 'Send one question to 2–4 models and compare them side by side. Great for picking a model or judging quality.<br><br>'
+  + '<b style="color:var(--cyan)">What about money</b><br>'
+  + 'The owner charges <b>nothing at all</b> — there is no relay server, so your requests go straight from your browser to the model vendor,'
+  + 'using <b>your own quota and Key</b>. Tools all run locally and cost nothing.<br><br>'
+  + '<b style="color:var(--cyan)">Why some models won’t work</b><br>'
+  + 'Direct browser calls need the other side to allow CORS. Ones marked "Needs setup" (e.g. Anthropic, Ollama)'
+  + 'need extra config per the Keys page; ones marked "Needs relay" simply can’t be called from a browser.'
+  + '</div>'
+  + '<div class="row" style="margin-top:14px"><button class="btn pri" onclick="closeModal()">Got it</button></div>';
+  document.getElementById('mask').classList.add('on');
+}
+
+function goHome(){ location.href = HOME_URL; }
+
+/* ---------- View switching ---------- */
+function go(v, btn){
+  try{ if(v==='keys'){ setTimeout(fillProxy,30); setTimeout(ksInit,40); } }catch(e){}
+  var vs=document.querySelectorAll('.view');
+  for(var i=0;i<vs.length;i++) vs[i].classList.remove('on');
+  var t=document.getElementById('v-'+v);
+  if(t) t.classList.add('on');
+  var ts=document.querySelectorAll('.tab');
+  for(var j=0;j<ts.length;j++) ts[j].classList.remove('on');
+  if(btn && btn.classList) btn.classList.add('on');
+  else{
+    var b=document.querySelector('.tab[data-v="'+v+'"]');
+    if(b) b.classList.add('on');
+  }
+  window.scrollTo(0,0);
+  if(v==='keys'){ renderProvList(); renderCustomList(); }
+  if(v==='arena'){ renderArenaPick(); buildArenaGrid(); }
+  if(v==='chat'){ renderModelSelect(); }
+}
+
+/* ---------- Security notice ---------- */
+function hideSecNote(){
+  var e=document.getElementById('secNote'); if(e) e.style.display='none';
+  var s=store(); if(s) try{ s.setItem('edge_ai_seen','1') }catch(x){}
+}
+
+/* ---------- Init ---------- */
+var HOME_URL = 'https://eclk0963.ccwu.cc/';
+
+function init(){
+  var s=store();
+  var seen=false;
+  try{ seen = !!(s && s.getItem('edge_ai_seen')); }catch(e){}
+  if(!seen){ var n=document.getElementById('secNote'); if(n) n.style.display=''; }
+
+  renderProvList();
+  renderCustomList();
+  renderModelSelect();
+  renderToolList();
+  renderArenaPick();
+  buildArenaGrid();
+
+  /* Restore the last conversation */
+  var h=chatHist();
+  if(h && h.length){
+    var box=document.getElementById('msgs');
+    if(box){
+      h.forEach(function(m){
+        var d=document.createElement('div');
+        d.className='msg '+(m.role==='user'?'me':'ai');
+        d.innerHTML='<div class="who">'+(m.role==='user'?'Me':'AI')+'</div><div class="md">'+md(m.content)+'</div>';
+        box.appendChild(d);
+      });
+      box.scrollTop=box.scrollHeight;
+      chatMsgs=h;
+    }
+  }
+
+  /* Enter sends */
+  var inp=document.getElementById('chatIn');
+  if(inp){
+    inp.addEventListener('keydown', function(e){
+      if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendChat(); }
+    });
+    inp.addEventListener('input', function(){
+      this.style.height='auto';
+      this.style.height=Math.min(this.scrollHeight,150)+'px';
+    });
+  }
+
+  /* Arena默认选前两个Configured Key 的 */
+  var cnt=0;
+  PROVIDERS.forEach(function(p){
+    if(cnt<2 && getKey(p.id) && (p.models||[]).length){
+      arenaSel.push(mkKey(p.id, p.models[0])); cnt++;
+    }
+  });
+  renderArenaPick(); buildArenaGrid();
+}
+
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', init);
+else init();
+
+
+/* ============================================================
+   Account system / sign-in gate / Points sync / Free model
+   ------------------------------------------------------------
+   1) Supabase 邮箱验证码Sign in（认证交给 Supabase，前端不存密码）
+   2) sign-in态 → 站长邮箱判定 → 站长模式
+   3) 提问扣Main Site积分（edge_points.balance）
+   4) 站长可发布"Free model"，每人限额 N times
+   ============================================================ */
+
+var ACCT = {
+  supaUrl:   'https://djlkkguzlloswnzeejhm.supabase.co',
+  proxyUrl:  localStorage.getItem('edge_proxy') || '',
+  supaAnon:  'sb_publishable_yFWKmbGx--8mHfcmsgJNlQ_Oyp5ygl9',
+  ownerMail: 'uxuvoyiz81@gmail.com',   // Owner email: matching it on sign-in → owner mode
+  costPerAsk: 1,      // Main-site points charged per question
+  pubLimit:   5,      // Free model quota per user (owner can change it)
+  ptsTable:  'edge_points',
+  mailCol:   'user_email',
+  balCol:    'balance'
+};
+
+/* Session state */
+var SES = { email:'', token:'', isRoot:false, guest:false, pts:null };
+
+/* ---------- Local read / write ---------- */
+function lsGet(k, d){ try{ var v=localStorage.getItem(k); return v==null?d:JSON.parse(v); }catch(e){ return d; } }
+function lsSet(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+function lsDel(k){ try{ localStorage.removeItem(k); }catch(e){} }
+
+/* 站长发布的Free model配置（存在站长本机；用户端由站长Export的一段配置串导入） */
+function pubCfg(){ return lsGet('edge_pub_model', null); }
+function setPubCfg(c){ lsSet('edge_pub_model', c); }
+function pubOn(){ var c=pubCfg(); return !!(c && c.base && c.key && c.model); }
+function pubUsed(){ return lsGet('edge_pub_used_'+(SES.email||'guest'), 0); }
+function pubAddUsed(){ lsSet('edge_pub_used_'+(SES.email||'guest'), pubUsed()+1); }
+function pubLeft(){
+  var c=pubCfg(); var lim=(c&&c.limit)||ACCT.pubLimit;
+  return Math.max(0, lim - pubUsed());
+}
+
+/* ============================================================
+   Sign-in gate UI
+   ============================================================ */
+function agTab(m){
+  document.getElementById('agTabUser').classList.toggle('on', m==='user');
+  document.getElementById('agTabRoot').classList.toggle('on', m==='root');
+  window.__agMode = m;
+  var e=document.getElementById('agEmail');
+  if(m==='root') e.value = ACCT.ownerMail;      // Switching to owner forces the owner email so no old email lingers
+}
+function agErr(t){ var el=document.getElementById('agErr'); if(el) el.textContent=t||''; }
+function agErr2(t){ var el=document.getElementById('agErr2'); if(el) el.textContent=t||''; }
+
+/* ---------- Supabase Auth ---------- */
+async function supaOtp(email){
+  try{
+    var r=await fetch(ACCT.supaUrl+'/auth/v1/otp',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':ACCT.supaAnon},
+      body:JSON.stringify({email:email, create_user:true})
+    });
+    if(r.ok) return {ok:true};
+    var j=await r.json().catch(function(){return {}});
+    var m=(j&&(j.msg||j.message||j.error_description))||('Send failed '+r.status);
+    if(/rate|limit/i.test(m)) m='Sending too fast, wait 60 seconds';
+    return {ok:false, msg:m};
+  }catch(e){ return {ok:false, msg:'Network error: '+(e.message||e)}; }
+}
+
+
+/* ============================================================
+   OAuth sign-in（Google / GitHub）—— 与Main Site同一套 Supabase Auth
+   ------------------------------------------------------------
+   复用Main Site逻辑：signInWithOAuth + skipBrowserRedirect:true
+   + redirectTo 当前页 + SDK 自动接管回跳（含 PKCE code 交换）
+   ============================================================ */
+
+var SB = null;
+
+function sbClient(){
+  if(SB) return SB;
+  if(!window.supabase || typeof window.supabase.createClient!=='function') return null;
+  SB = window.supabase.createClient(ACCT.supaUrl, ACCT.supaAnon, {
+    auth:{
+      detectSessionInUrl:true,    // Auto-handles the OAuth return (#access_token or ?code=)
+      persistSession:true,        // Stored in localStorage, survives refresh
+      autoRefreshToken:true,
+      storageKey:'edge_aistudio_auth'
+    }
+  });
+  return SB;
+}
+
+function oauthRedirect(){
+  return window.location.origin + window.location.pathname;
+}
+
+async function oauthLogin(provider){
+  agErr('');
+  var c = sbClient();
+  if(!c){ agErr('The sign-in module isn’t ready yet, try refreshing'); return; }
+
+  var btns=document.querySelectorAll('.ag-oauth');
+  btns.forEach(function(b){ b.disabled=true; });
+  toast('Opening '+provider.toUpperCase()+' signing in…');
+  try{
+    var r = await c.auth.signInWithOAuth({
+      provider: provider,
+      options:{ redirectTo:oauthRedirect(), skipBrowserRedirect:true }
+    });
+    if(r.error){ agErr('Sign-in failed: '+(r.error.message||'OAuth failed to start')); btns.forEach(function(b){b.disabled=false;}); return; }
+    if(!r.data || !r.data.url){
+      agErr('Could not build the sign-in URL — that method isn’t enabled in Supabase');
+      btns.forEach(function(b){b.disabled=false;});
+      return;
+    }
+    window.location.assign(r.data.url);
+  }catch(e){
+    agErr('Sign-in error: '+(e&&e.message||e));
+    btns.forEach(function(b){b.disabled=false;});
+  }
+}
+
+
+async function supaVerify(email, token){
+  try{
+    var r=await fetch(ACCT.supaUrl+'/auth/v1/verify?type=email',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':ACCT.supaAnon},
+      body:JSON.stringify({email:email, token:token, type:'email'})
+    });
+    var j=await r.json().catch(function(){return {}});
+    if(!r.ok || !j.access_token){
+      var m=(j&&(j.msg||j.message||j.error_description))||('Verification failed '+r.status);
+      if(/expired/i.test(m)) m='Code expired, sending a new one';
+      if(/invalid/i.test(m)) m='Wrong or expired code';
+      return {ok:false, msg:m};
+    }
+    return {ok:true, token:j.access_token, uid:j.user&&j.user.id};
+  }catch(e){ return {ok:false, msg:'Network error: '+(e.message||e)}; }
+}
+
+/* ---------- Email code flow ---------- */
+async function agSendCode(){
+  var em=(document.getElementById('agEmail').value||'').trim().toLowerCase();
+  agErr('');
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)){ agErr('Invalid email format'); return; }
+  var b=document.querySelector('#agMailWrap .btn');
+  var oldTxt=b.textContent; b.disabled=true; b.textContent='Sending…';
+  var r=await supaOtp(em);
+  b.disabled=false; b.textContent=oldTxt;
+  if(!r.ok){ agErr(r.msg); return; }
+  SES.email=em;
+  document.getElementById('agMailShow').textContent=em;
+  agShowCode();
+}
+
+async function agVerify(){
+  var code=(document.getElementById('agCode').value||'').trim();
+  agErr2('');
+  if(!/^\d{6}$/.test(code)){ agErr2('Please enter the 6-digit code'); return; }
+  var b=document.querySelector('#agCodeWrap .btn.pri');
+  b.disabled=true; b.textContent='Verifying…';
+  var r=await supaVerify(SES.email, code);
+  b.disabled=false; b.textContent='✅ Verify and enter';
+  if(!r.ok){ agErr2(r.msg); return; }
+  enterApp(SES.email, r.token);
+}
+
+function agGuest(){
+  SES.guest=true; SES.email=''; SES.token=''; SES.isRoot=false; SES.pts=null;
+  document.getElementById('authGate').classList.add('hide');
+  renderAcctBar();
+  toast('Guest mode: chat works, Tools and free models are locked');
+}
+
+/* ---------- Enter the app ---------- */
+function enterApp(email, token){
+  SES.email=email; SES.token=token; SES.guest=false;
+  SES.isRoot = (String(email).toLowerCase()===ACCT.ownerMail.toLowerCase());
+  lsSet('edge_ses', {email:email, token:token, ts:Date.now()});
+  document.getElementById('authGate').classList.add('hide');
+  renderAcctBar();
+  renderPubBar();
+  renderRootPanel();
+  injectPubProvider();
+  refreshModels();
+  syncPoints();
+  toast(SES.isRoot ? '👑 Owner mode enabled' : '✓ Signed in · points synced');
+}
+
+/* ---------- 邮箱验证码（保留，作为没 Google/GitHub 账号时的备选） ---------- */
+function agShowCode(){
+  document.getElementById('agMailWrap').style.display='none';
+  document.getElementById('agCodeWrap').style.display='';
+  document.getElementById('agCode').focus();
+}
+function agBack(){
+  document.getElementById('agCodeWrap').style.display='none';
+  document.getElementById('agMailWrap').style.display='';
+  agErr2('');
+}
+
+/* ---------- Session restore / and state listener ---------- */
+function authFromSession(sess){
+  if(!sess || !sess.user) return false;
+  var email = sess.user.email || '';
+  if(!email){
+    var m = sess.user.user_metadata || {};
+    email = m.email || m.preferred_username || '';
+  }
+  if(!email) return false;
+  enterApp(email, sess.access_token);
+  return true;
+}
+
+async function authBootOAuth(){
+  var c = sbClient();
+  if(!c){
+    /* SDK not loaded: keep the sign-in gate visible but show a hint */
+    setTimeout(function(){
+      if(!c && !SES.token && !SES.guest){
+        agErr('Sign-in module failed to load — check your network and refresh');
+      }
+      window.__bsAuthDone = true;
+    }, 2500);
+    window.__bsAuthDone = true;
+    return;
+  }
+  /* Watch state changes (including the moment OAuth lands) */
+  try{
+    c.auth.onAuthStateChange(function(ev, sess){
+      if(ev==='SIGNED_IN' && sess) authFromSession(sess);
+      else if(ev==='TOKEN_REFRESHED' && sess && SES.email){
+        SES.token = sess.access_token;
+      }
+      else if(ev==='SIGNED_OUT'){ /* Ignore: sign-out is handled by agLogout itself */ }
+    });
+  }catch(e){}
+  /* Fallback: read once proactively (refresh restore / SDK init race) */
+  try{
+    var r = await c.auth.getSession();
+    if(r && r.data && r.data.session) authFromSession(r.data.session);
+  }catch(e){}
+  /* Tell the boot screen: account probing is done (signed in or not) */
+  window.__bsAuthDone = true;
+}
+
+/* Hook that runs after the boot screen collapses */
+window.bsAfterBoot = function(){
+  /* Not signed in: the gate is visible in the HTML by default, nothing to do
+     Signed in: authBootOAuth already called enterApp, the gate is hidden */
+  try{
+    var g=document.getElementById('authGate');
+    if(g && SES && SES.email) g.classList.add('hide');
+  }catch(e){}
+};
+
+/* ---------- Sign out: also clear the Supabase session ---------- */
+async function agLogout(){
+  try{
+    var c = sbClient();
+    if(c) await c.auth.signOut();
+  }catch(e){}
+  lsDel('edge_ses');
+  SES.guest=false; SES.email=''; SES.token=''; SES.isRoot=false; SES.pts=null;
+  document.getElementById('authGate').classList.remove('hide');
+  agBack();
+  var ac=document.getElementById('acctBar'); if(ac) ac.remove();
+  var pb=document.getElementById('pubBar'); if(pb) pb.remove();
+  var rp=document.getElementById('rootPanel'); if(rp) rp.remove();
+  toast('Signed out');
+}
+
+
+/* ============================================================
+   Account bar in the top bar
+   ============================================================ */
+function renderAcctBar(){
+  var old=document.getElementById('acctBar'); if(old) old.remove();
+  var host=document.querySelector('.top-right');
+  if(!host) return;
+  var d=document.createElement('div');
+  d.className='acct'; d.id='acctBar';
+  if(SES.guest){
+    d.innerHTML='<span class="acct-badge guest">Guest</span>'+
+      '<button class="tbtn" onclick="agLogout()">Sign in</button>';
+  }else{
+    d.innerHTML=
+      (SES.isRoot?'<span class="acct-badge root">👑 Owner</span>':'')+
+      '<span class="acct-mail">'+esc(SES.email)+'</span>'+
+      '<span class="acct-pts" id="acctPts">P …</span>'+
+      '<button class="tbtn" onclick="agLogout()">Sign out</button>';
+  }
+  host.insertBefore(d, host.firstChild);
+}
+function setPts(n){
+  SES.pts=n;
+  var el=document.getElementById('acctPts');
+  if(el) el.textContent = (SES.isRoot && n===null) ? 'P ∞' : ('P '+(n==null?'…':n));
+}
+
+/* ============================================================
+   Points sync (read / and write edge_points)
+   ------------------------------------------------------------
+   Requests use the signed-in user token; RLS only allows their own row — safe.
+   If unreadable, fall back to local accounting without blocking use.
+   ============================================================ */
+function supaHdr(json){
+  var h={'apikey':ACCT.supaAnon,'Authorization':'Bearer '+SES.token};
+  if(json){ h['Content-Type']='application/json'; }
+  return h;
+}
+async function readPoints(){
+  if(SES.guest || !SES.token) return null;
+  try{
+    var u=ACCT.supaUrl+'/rest/v1/'+ACCT.ptsTable+
+          '?'+ACCT.mailCol+'=eq.'+encodeURIComponent(SES.email)+'&select=*';
+    var r=await fetch(u,{headers:supaHdr(false)});
+    if(!r.ok) return null;
+    var j=await r.json();
+    if(Array.isArray(j) && j.length) return j[0];
+    return null;
+  }catch(e){ return null; }
+}
+async function writePoints(bal, extra){
+  if(SES.guest || !SES.token) return false;
+  try{
+    var row={}; row[ACCT.balCol]=bal;
+    if(extra) for(var k in extra) row[k]=extra[k];
+    var u=ACCT.supaUrl+'/rest/v1/'+ACCT.ptsTable+
+          '?'+ACCT.mailCol+'=eq.'+encodeURIComponent(SES.email);
+    var r=await fetch(u,{method:'PATCH',headers:Object.assign(supaHdr(true),{'Prefer':'return=minimal'}),
+      body:JSON.stringify(row)});
+    /* Insert a row if there is none */
+    if(r.status===404 || (r.ok===false && r.status>=400)){
+      var ins={}; ins[ACCT.mailCol]=SES.email; ins[ACCT.balCol]=bal;
+      if(extra) for(var k2 in extra) ins[k2]=extra[k2];
+      await fetch(ACCT.supaUrl+'/rest/v1/'+ACCT.ptsTable,
+        {method:'POST',headers:Object.assign(supaHdr(true),{'Prefer':'return=minimal'}),
+         body:JSON.stringify(ins)});
+    }
+    return true;
+  }catch(e){ return false; }
+}
+async function refreshToken(){
+  try{ var c=sbClient(); if(!c) return;
+    var r=await c.auth.getSession();
+    if(r&&r.data&&r.data.session) SES.token=r.data.session.access_token;
+  }catch(e){}
+}
+async function syncPoints(){
+  await refreshToken();
+  var row=await readPoints();
+  if(row && row[ACCT.balCol]!=null){
+    setPts(Number(row[ACCT.balCol]));
+  }else{
+    setPts(SES.isRoot ? null : 0);
+  }
+}
+
+/* ============================================================
+   Before asking: deduct points / Free models count against a quota
+   返回 {ok:true} 或 {ok:false,msg}
+   ============================================================ */
+/* Prefer the atomic cloud function: no miscounting under concurrency
+   Without the SQL it degrades to local accounting, functionality intact */
+/* Returns:
+     {v:值}            成功
+     {err:'nofunc'}    cloud function missing (SQL not run) → fallback allowed
+     {err:'denied',msg} business rejection (quota/or points short) → no fallback */
+async function rpc(name, args){
+  if(SES.guest || !SES.token) return {err:'nofunc'};
+  try{
+    var r=await fetch(ACCT.supaUrl+'/rest/v1/rpc/'+name,{
+      method:'POST',
+      headers:Object.assign(supaHdr(true),{'Prefer':'return=minimal'}),
+      body:JSON.stringify(args||{})
+    });
+    if(!r.ok){
+      if(r.status===404 || r.status===400 && /does not exist|schema cache/i.test(await r.text().catch(function(){return ''})) )
+        return {err:'nofunc'};
+      if(r.status>=400 && r.status<500){
+        /* 4xx = 函数存在但拒绝了业务（积分不足 / quota used up) */
+        var msg='';
+        try{ var j=JSON.parse(await r.text()); msg=j.message||j.hint||j.details||''; }catch(e){}
+        return {err:'denied', msg:msg};
+      }
+      return {err:'nofunc'};
+    }
+    var t=await r.text();
+    if(!t) return {err:'nofunc'};
+    return {v:JSON.parse(t)};
+  }catch(e){ return {err:'nofunc'}; }
+}
+
+async function acctPreAsk(selProvId){
+  /* 0) Free models: no points, a quota instead */
+  if(selProvId==='__pub'){
+    if(!pubOn()) return {ok:false, msg:'No free model configured (the owner publishes one on the Keys page)'};
+    if(SES.guest) return {ok:false, msg:'Free models require sign-in'};
+    var lim=((pubCfg()&&pubCfg().limit)||ACCT.pubLimit);
+    /* Cloud quota first */
+    var qr=await rpc('edge_ai_take_quota',{p_limit:lim});
+    if(qr && qr.v!==undefined){
+      renderPubBarCloud(qr.v, lim);
+      return {ok:true, pub:true};
+    }
+    if(qr && qr.err==='denied'){
+      return {ok:false, msg: qr.msg || ('Free model quota used up (limit '+lim+' times）')};
+    }
+    /* Local counting only if the function is missing */
+    if(pubLeft()<=0) return {ok:false, msg:'Free model quota used up (limit '+lim+' times）'};
+    pubAddUsed();
+    renderPubBar();
+    return {ok:true, pub:true};
+  }
+  /* 1) Guest: tools locked, chat uses their own Key, no points deducted */
+  if(SES.guest) return {ok:true};
+  /* 2) Owner: don’t deduct from yourself */
+  if(SES.isRoot) return {ok:true};
+  /* 3) Regular user: deduct points */
+  var cost=ACCT.costPerAsk;
+  if(!cost) return {ok:true};
+
+  /* Atomic cloud billing first (only after running the SQL) */
+  var sr=await rpc('edge_ai_spend',{p_cost:cost});
+  if(sr && sr.v!==undefined){
+    setPts(Number(sr.v)<0 ? null : Number(sr.v));
+    return {ok:true, cost:cost};
+  }
+  if(sr && sr.err==='denied'){
+    return {ok:false, msg: sr.msg || ('Not enough points (need '+cost+' P）')};
+  }
+
+  /* Fallback: read → subtract → write locally */
+  if(SES.pts==null){ await syncPoints(); }
+  var cur=(SES.pts==null)?0:Number(SES.pts);
+  if(cur < cost) return {ok:false, msg:'Not enough points (need '+cost+' P, current '+cur+' P）'};
+  var next=cur-cost;
+  await writePoints(next);
+  setPts(next);
+  return {ok:true, cost:cost};
+}
+
+/* Free-model bar (remaining cloud quota) */
+function renderPubBarCloud(left, lim){
+  var old=document.getElementById('pubBar'); if(old) old.remove();
+  if(!pubOn()) return;
+  var c=pubCfg();
+  var host=document.querySelector('#v-chat');
+  if(!host) return;
+  var d=document.createElement('div');
+  d.className='pubbar'; d.id='pubBar';
+  d.innerHTML='<b>🎁 Free model</b><span>'+esc(c.name||c.model)+'</span>'+
+    '<span class="left">Left '+left+' / '+lim+'</span>'+
+    '<span style="color:var(--dim2)">Cloud counter</span>';
+  host.insertBefore(d, host.firstChild);
+}
+
+/* ============================================================
+   Free model：注入为一个虚拟 provider + 提示条
+   ============================================================ */
+function injectPubProvider(){
+  if(!pubOn()) return;
+  var c=pubCfg();
+  var exists=(window.PROVIDERS||[]).some(function(p){ return p.id==='__pub'; });
+  if(!exists && Array.isArray(window.PROVIDERS)){
+    window.PROVIDERS.push({
+      id:'__pub', name:'🎁 Free model', base:c.base,
+      models:[c.model], pub:true,
+      note:c.name||'Shared quota published by the owner'
+    });
+  }else if(exists){
+    window.PROVIDERS.forEach(function(p){ if(p.id==='__pub'){ p.base=c.base; p.models=[c.model]; } });
+  }
+  /* getKey fallback: free models use the shared key */
+  if(typeof window.getKey==='function' && !window.__getKeyPatched){
+    var orig=window.getKey;
+    window.getKey=function(id){
+      if(id==='__pub') return pubOn() ? pubCfg().key : '';
+      return orig.apply(this, arguments);
+    };
+    window.__getKeyPatched=true;
+  }
+}
+function renderPubBar(){
+  var old=document.getElementById('pubBar'); if(old) old.remove();
+  if(!pubOn()) return;
+  var c=pubCfg(), left=pubLeft(), lim=c.limit||ACCT.pubLimit;
+  var host=document.querySelector('#v-chat');
+  if(!host) return;
+  var d=document.createElement('div');
+  d.className='pubbar'; d.id='pubBar';
+  d.innerHTML='<b>🎁 Free model</b><span>'+esc(c.name||c.model)+'</span>'+
+    '<span class="left">Left '+left+' / '+lim+'</span>'+
+    (SES.isRoot?'<span style="color:var(--dim2)">(unlimited for the owner)</span>':'');
+  host.insertBefore(d, host.firstChild);
+}
+
+
+/* ---------- Relay ---------- */
+function saveProxy(v){
+  ACCT.proxyUrl = (v||'').trim();
+  if(ACCT.proxyUrl) localStorage.setItem('edge_proxy', ACCT.proxyUrl);
+  else localStorage.removeItem('edge_proxy');
+  var st=document.getElementById('pxState');
+  if(st){ st.textContent = ACCT.proxyUrl ? 'Enabled' : 'Off (direct)'; st.style.color = ACCT.proxyUrl ? 'var(--green)' : 'var(--dim)'; }
+}
+function clearProxy(){
+  var el=document.getElementById('pxUrl'); if(el) el.value='';
+  saveProxy('');
+  toast('Relay off, back to direct');
+}
+async function testProxy(){
+  var el=document.getElementById('pxUrl');
+  var v=(el && el.value || ACCT.proxyUrl || '').trim();
+  var st=document.getElementById('pxState');
+  if(!v){ if(st){st.textContent='Please enter a relay address first';st.style.color='var(--red)';} return; }
+  saveProxy(v);
+  if(st){ st.textContent='Testing…'; st.style.color='var(--cyan)'; }
+  try{
+    var ctl=new AbortController();
+    var timer=setTimeout(function(){ctl.abort();},12000);
+    var r=await fetch(v.replace(/\/+$/,'')+'/ping',{method:'GET',signal:ctl.signal});
+    clearTimeout(timer);
+    var j=await r.json().catch(function(){return{}});
+    if(r.ok && j.ok){
+      if(st){ st.textContent='✓ Relay works'; st.style.color='var(--green)'; }
+      toast('Relay works — now go test a model');
+    }else{
+      if(st){ st.textContent='✗ Bad response ('+r.status+')'; st.style.color='var(--red)'; }
+    }
+  }catch(e){
+    if(st){ st.textContent='✗ Cannot connect ('+String(e.message||e).slice(0,40)+'）'; st.style.color='var(--red)'; }
+  }
+}
+/* Prefill when entering the Keys page */
+function fillProxy(){
+  var el=document.getElementById('pxUrl');
+  if(el) el.value = ACCT.proxyUrl||'';
+  var st=document.getElementById('pxState');
+  if(st){ st.textContent = ACCT.proxyUrl ? 'Enabled' : 'Off (direct)'; st.style.color = ACCT.proxyUrl ? 'var(--green)' : 'var(--dim)'; }
+}
+
+/* ============================================================
+   Owner panel（Owner only可见）
+   ============================================================ */
+function renderRootPanel(){
+  if(!SES.isRoot) return;
+  var old=document.getElementById('rootPanel'); if(old) old.remove();
+  var host=document.querySelector('#v-keys');
+  if(!host) return;
+  var c=pubCfg()||{};
+  var d=document.createElement('div');
+  d.className='card rootpanel'; d.id='rootPanel';
+  d.innerHTML=
+   '<h3>👑 Owner panel <span class="cnt">Visible to the owner email only</span></h3>'+
+   '<div class="grid g2">'+
+     '<div><label style="font-size:11px;color:var(--dim)">Free model · display name</label>'+
+       '<input id="pubName" placeholder="e.g. Free trial GLM" value="'+esc(c.name||'')+'"></div>'+
+     '<div><label style="font-size:11px;color:var(--dim)">Base URL (a Cloudflare AI Gateway URL is recommended)</label>'+
+       '<input id="pubBase" placeholder="https://gateway.ai.cloudflare.com/v1/xxx/edge-ai/compat" value="'+esc(c.base||'')+'"></div>'+
+     '<div><label style="font-size:11px;color:var(--dim)">Shared API Key</label>'+
+       '<input id="pubKey" placeholder="sk-..." value="'+esc(c.key||'')+'"></div>'+
+     '<div><label style="font-size:11px;color:var(--dim)">Model ID</label>'+
+       '<input id="pubModel" placeholder="glm-4.7-flash" value="'+esc(c.model||'')+'"></div>'+
+     '<div><label style="font-size:11px;color:var(--dim)">Per-user limit (times)</label>'+
+       '<input id="pubLimit" type="number" min="1" max="999" value="'+(c.limit||ACCT.pubLimit)+'"></div>'+
+     '<div><label style="font-size:11px;color:var(--dim)">Points charged per question</label>'+
+       '<input id="pubCost" type="number" min="0" max="100" value="'+(ACCT.costPerAsk)+'"></div>'+
+   '</div>'+
+   '<div class="row" style="margin-top:11px">'+
+     '<button class="btn pri" onclick="rootSavePub()">📢 Publish free model</button>'+
+     '<button class="btn dan" onclick="rootDelPub()">🗑 Withdraw</button>'+
+     '<button class="btn sm" onclick="rootExport()">📋 Export config</button>'+
+   '</div>'+
+   '<div class="ag-warn">⚠️ A shared Key appears in the front-end code — any visitor can grab it.'+
+     'Only use Keys that are <strong>free, rate-limited and revocable</strong>;'+
+     'Cloudflare AI Gateway is recommended, with Rate Limit and caching at the gateway.</div>'+
+   '<div style="margin-top:12px;border-top:1px solid var(--line);padding-top:11px">'+
+     '<h3 style="font-size:13px;margin:0 0 8px">🔍 Cloud Keys (all users)</h3>'+
+     '<div id="ksAdmin"><span style="font-size:11px;color:var(--dim)">Loading…</span></div>'+
+     '<button class="btn sm" style="margin-top:8px" onclick="renderKsAdmin()">🔄 Refresh</button>'+
+   '</div>'+
+   '<div style="margin-top:12px;border-top:1px solid var(--line);padding-top:11px">'+
+     '<div id="aicapHost"></div>'+
+   '</div>';
+  host.insertBefore(d, host.firstChild);
+  setTimeout(renderKsAdmin, 100);
+  try{ if(typeof renderAicapCfg==='function') renderAicapCfg(document.getElementById('aicapHost')); }catch(e){}
+}
+function rootSavePub(){
+  var g=function(id){ return (document.getElementById(id)||{}).value||''; };
+  var base=g('pubBase').trim().replace(/\/+$/,'');
+  var key=g('pubKey').trim(), model=g('pubModel').trim();
+  if(!base || !key || !model){ toast('Base URL / Key / model ID are all required'); return; }
+  var lim=parseInt(g('pubLimit'),10); if(!lim || lim<1) lim=ACCT.pubLimit;
+  var cost=parseInt(g('pubCost'),10); if(isNaN(cost)||cost<0) cost=1;
+  setPubCfg({name:g('pubName').trim()||'Free model', base:base, key:key, model:model, limit:lim});
+  ACCT.costPerAsk=cost;
+  injectPubProvider(); renderPubBar(); refreshModels();
+  toast('✓ Free model published, '+lim+' times');
+}
+function rootDelPub(){
+  lsDel('edge_pub_model');
+  var old=document.getElementById('pubBar'); if(old) old.remove();
+  if(Array.isArray(window.PROVIDERS)){
+    for(var i=window.PROVIDERS.length-1;i>=0;i--) if(window.PROVIDERS[i].id==='__pub') window.PROVIDERS.splice(i,1);
+  }
+  refreshModels();
+  toast('Free model withdrawn');
+}
+function rootExport(){
+  var c=pubCfg(); if(!c){ toast('Not published yet'); return; }
+  var s=JSON.stringify(c);
+  try{ navigator.clipboard.writeText(s); toast('Config copied (contains Keys, don’t share it)'); }
+  catch(e){ prompt('Copy this config:', s); }
+}
+
+/* Re-render the model dropdown so free models show up */
+function refreshModels(){
+  try{
+    if(typeof window.renderModelSelect==='function') window.renderModelSelect();
+    if(typeof window.renderArenaPick==='function') window.renderArenaPick();
+    if(typeof window.renderProvList==='function') window.renderProvList();
+  }catch(e){}
+}
+
+/* ============================================================
+   Tools / View gating
+   ============================================================ */
+function needLogin(feature){
+  if(SES.guest || !SES.token){
+    toast('🔒 '+feature+'Sign-in required');
+    agLogout();
+    return false;
+  }
+  return true;
+}
+function hookGo(){
+  if(typeof window.go!=='function' || window.__goPatched) return;
+  var orig=window.go;
+  window.go=function(v, btn){
+    if(v==='tools' && !needLogin('Tools')) return;
+    if(v==='keys'  && !needLogin('Keys')) return;
+    return orig.apply(this, arguments);
+  };
+  window.__goPatched=true;
+}
+
+/* ============================================================
+   Boot
+   ============================================================ */
+/* Never render the shared free-model Key on the Keys page */
+function hookProvList(){
+  if(typeof window.renderProvList!=='function' || window.__provPatched) return;
+  var orig=window.renderProvList;
+  window.renderProvList=function(){
+    var bak=window.PROVIDERS;
+    try{ window.PROVIDERS=(bak||[]).filter(function(p){ return p.id!=='__pub'; }); }
+    catch(e){}
+    try{ return orig.apply(this, arguments); }
+    finally{ window.PROVIDERS=bak; }
+  };
+  window.__provPatched=true;
+}
+
+function acctBoot(){
+  hookGo();
+  hookProvList();
+  /* OAuth：SDK 自己持久化会话，命中就自动 enterApp；没命中Sign in门保持可见 */
+  authBootOAuth();
+}
+
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', acctBoot);
+else acctBoot();
+
+
+
+/* ============================================================
+   Boot screen logic
+   ------------------------------------------------------------
+   Progress = real readiness signals + elapsed time; both must be satisfied to hit 100%
+   So it never fakes loading, and never gets stuck
+   ============================================================ */
+
+var BS = {
+  t0: (window.performance && performance.now) ? performance.now() : Date.now(),
+  MIN: 1700,      // Minimum display so it doesn’t just flash
+  MAX: 7000,      // Hard maximum, never gets stuck
+  done: false,
+  // 三项真实信号
+  sig: { sdk:false, ui:false, auth:false }
+};
+
+function bsNow(){
+  return ((window.performance && performance.now) ? performance.now() : Date.now()) - BS.t0;
+}
+
+/* Stage text follows the progress */
+var BS_STEPS = [
+  [  0, "Establishing a secure connection",   "INITIALISING SYSTEM"],
+  [ 26, "Loading runtime modules", "LOADING RUNTIME"],
+  [ 52, "Loading 41 models", "LOADING MODELS"],
+  [ 74, "Syncing account status",   "SYNCING ACCOUNT"],
+  [ 94, "Almost done initializing",     "FINALISING"]
+];
+
+function bsPaint(p){
+  var fill=document.getElementById('bsFill');
+  var pct =document.getElementById('bsPct');
+  var msg =document.getElementById('bsMsg');
+  var lab =document.getElementById('bsLabel');
+  if(fill) fill.style.width = p + '%';
+  if(pct)  pct.textContent  = Math.floor(p) + '%';
+  for(var i=0;i<BS_STEPS.length;i++){
+    if(p >= BS_STEPS[i][0]){
+      if(msg) msg.textContent = BS_STEPS[i][1];
+      if(lab) lab.textContent = BS_STEPS[i][2];
+    }
+  }
+}
+
+/* Light up an indicator */
+function bsSignal(name){
+  if(BS.sig[name]===true) return;
+  BS.sig[name]=true;
+  var id={sdk:'bsM1', ui:'bsM2', auth:'bsM3'}[name];
+  var el=document.getElementById(id);
+  if(el) el.classList.remove('wait');
+}
+
+/* Compute the current progress:
+   - 时间基准：线性爬到 92%（受 MIN 约束）
+   - 真实信号：三项占最后 8%
+   - 全部就绪后才允许冲到 100% */
+function bsCalc(){
+  var el = bsNow();
+  var byTime = Math.min(92, (el / BS.MIN) * 92);
+  var sigN = (BS.sig.sdk?1:0) + (BS.sig.ui?1:0) + (BS.sig.auth?1:0);
+  var bySig = (sigN / 3) * 100;
+
+  /* 时间没到：最多显示 min(时间进度, 信号给的进度) —— 信号是上限 */
+  if(el < BS.MIN){
+    return Math.min(byTime, bySig * 0.92);
+  }
+  /* 时间到了：由信号决定能不能冲线 */
+  if(sigN === 3) return 100;
+  /* 超时Fallback：不管信号如何都放行 */
+  if(el >= BS.MAX) return 100;
+  /* 时间已过 MIN 但信号不全：卡在 92% 等，但缓慢爬
+     （避免看起来"卡住"） */
+  var extra = Math.min(7, ((el - BS.MIN) / (BS.MAX - BS.MIN)) * 7);
+  return Math.min(99, byTime + extra);
+}
+
+function bsTick(){
+  if(BS.done) return;
+  var p = bsCalc();
+  bsPaint(p);
+
+  if(p >= 100){
+    BS.done = true;
+    var st=document.getElementById('bsState');
+    var msg=document.getElementById('bsMsg');
+    var lab=document.getElementById('bsLabel');
+    if(st)  st.textContent  = 'ready';
+    if(msg) msg.textContent = 'System ready';
+    if(lab) lab.textContent = 'SYSTEM READY';
+    bsPaint(100);
+    setTimeout(bsHide, 260);
+    return;
+  }
+  requestAnimationFrame(bsTick);
+}
+
+function bsHide(){
+  var s=document.getElementById('bsScreen');
+  if(!s) return;
+  s.classList.add('out');
+  setTimeout(function(){
+    s.style.display='none';
+    try{ s.remove(); }catch(e){}
+    /* 收起后：已Sign in则保持应用，未Sign in则Sign in门已经在那儿 */
+    try{ if(window.bsAfterBoot) window.bsAfterBoot(); }catch(e){}
+  }, 600);
+}
+
+/* ---------- Signal sources ---------- */
+
+/* ① Runtime / SDK: supabase-js is ready */
+function bsWatchSdk(){
+  var tries=0;
+  (function poll(){
+    if(window.supabase && typeof window.supabase.createClient==='function'){
+      bsSignal('sdk'); return;
+    }
+    if(++tries > 200){ bsSignal('sdk'); return; }   // 10s fallback
+    setTimeout(poll, 50);
+  })();
+}
+
+/* ② UI: DOM and the model library finished rendering */
+function bsWatchUi(){
+  function done(){
+    bsSignal('ui');
+  }
+  if(document.readyState === 'complete') setTimeout(done, 60);
+  else window.addEventListener('load', function(){ setTimeout(done, 60); });
+  /* Fallback */
+  setTimeout(done, 3000);
+}
+
+/* ③ Account: session probing finished (signed in or not) */
+function bsWatchAuth(){
+  var tries=0;
+  (function poll(){
+    if(window.__bsAuthDone === true){ bsSignal('auth'); return; }
+    if(++tries > 120){ bsSignal('auth'); return; }   // 6s fallback
+    setTimeout(poll, 50);
+  })();
+}
+
+function bsBoot(){
+  bsWatchSdk();
+  bsWatchUi();
+  bsWatchAuth();
+  requestAnimationFrame(bsTick);
+}
+
+if(document.readyState === 'loading'){
+  document.addEventListener('DOMContentLoaded', bsBoot);
+}else{
+  bsBoot();
+}
+
+
+
+
+
+/* ============================================================
+   Key cloud sync
+   ------------------------------------------------------------
+   Encryption: AES-GCM (browser WebCrypto)
+   Two modes: 
+     user  —— 用户口令派生Keys，站长解不开，只能看脱敏
+     host  —— Hosted模式，站长可解密看到明文
+   Either way, only ciphertext is uploaded — never plaintext
+   ============================================================ */
+
+var KEYSYNC = {
+  on:    false,      // Whether cloud sync is enabled
+  mode:  'user',     // user / host
+  ready: false
+};
+
+/* ---------- Encryption basics ---------- */
+function b64enc(buf){
+  var b = new Uint8Array(buf), s = '';
+  for(var i=0;i<b.length;i++) s += String.fromCharCode(b[i]);
+  return btoa(s);
+}
+function b64dec(str){
+  var s = atob(str), b = new Uint8Array(s.length);
+  for(var i=0;i<s.length;i++) b[i] = s.charCodeAt(i);
+  return b;
+}
+
+/* Derive AES-GCM keys with PBKDF2 */
+async function deriveKey(pass, saltStr){
+  var enc = new TextEncoder();
+  var km = await crypto.subtle.importKey(
+    'raw', enc.encode(pass), 'PBKDF2', false, ['deriveKey']
+  );
+  return crypto.subtle.deriveKey(
+    { name:'PBKDF2', salt: enc.encode(saltStr), iterations: 120000, hash:'SHA-256' },
+    km,
+    { name:'AES-GCM', length:256 },
+    false,
+    ['encrypt','decrypt']
+  );
+}
+
+/* Passphrase and salt per mode
+   host 模式固定 → 站长用同样的值就能解开
+   user 模式跟用户口令走 → 站长解不开 */
+function syncPass(){
+  if(KEYSYNC.mode === 'host'){
+    return 'EDGE_HOST_MODE_V1';
+  }
+  return KEYSYNC.pass || '';
+}
+function syncSalt(){
+  if(KEYSYNC.mode === 'host'){
+    return 'edge-ai-host-salt-v1';
+  }
+  return 'edge-ai-user-' + (SES.email || 'anon');
+}
+
+async function encKey(plain){
+  var pass = syncPass();
+  if(!pass) return { enc:'', mode:KEYSYNC.mode };
+  var k = await deriveKey(pass, syncSalt());
+  var iv = crypto.getRandomValues(new Uint8Array(12));
+  var ct = await crypto.subtle.encrypt(
+    { name:'AES-GCM', iv:iv }, k, new TextEncoder().encode(plain)
+  );
+  return { enc: b64enc(iv) + '.' + b64enc(ct), mode:KEYSYNC.mode };
+}
+
+async function decKey(encStr, mode, ownerEmail){
+  if(!encStr) return '';
+  var pass, salt;
+  if(mode === 'host'){
+    pass = 'EDGE_HOST_MODE_V1'; salt = 'edge-ai-host-salt-v1';
+  }else{
+    /* 站长看别人的 user Mode: 只能用对方口令，通常解不开 */
+    if(ownerEmail && SES.email && ownerEmail.toLowerCase() !== SES.email.toLowerCase()){
+      if(!SES.isRoot) return '';
+      pass = KEYSYNC.guestPass || '';
+      salt = 'edge-ai-user-' + ownerEmail;
+    }else{
+      pass = KEYSYNC.pass || ''; salt = 'edge-ai-user-' + (SES.email||'anon');
+    }
+  }
+  if(!pass) return '';
+  try{
+    var parts = encStr.split('.');
+    if(parts.length !== 2) return '';
+    var k = await deriveKey(pass, salt);
+    var pt = await crypto.subtle.decrypt(
+      { name:'AES-GCM', iv: b64dec(parts[0]) }, k, b64dec(parts[1])
+    );
+    return new TextDecoder().decode(pt);
+  }catch(e){
+    return '';   // Wrong passphrase / tampered data → can’t decrypt
+  }
+}
+
+/* Masked display */
+function hintKey(k){
+  if(!k) return '';
+  var s = String(k);
+  if(s.length <= 10) return s.slice(0,3) + '****';
+  return s.slice(0,6) + '****' + s.slice(-4);
+}
+
+/* ---------- Cloud read / write ---------- */
+function ksHeaders(){
+  return {
+    'apikey': ACCT.supaAnon,
+    'Authorization': 'Bearer ' + (SES.token || ACCT.supaAnon),
+    'Content-Type': 'application/json'
+  };
+}
+
+/* Upload all local Keys to the cloud */
+async function ksPush(){
+  if(SES.guest || !SES.token) return {ok:false, msg:'You need to sign in first'};
+  var mode = KEYSYNC.mode;
+  if(mode === 'user' && !KEYSYNC.pass) return {ok:false, msg:'Please set a sync passphrase first'};
+
+  var o = LS() || {};
+  var ids = Object.keys(o);
+  if(!ids.length) return {ok:false, msg:'This browser has no Keys yet'};
+
+  var rows = [];
+  for(var i=0;i<ids.length;i++){
+    var pid = ids[i];
+    var prov = (window.PROVIDERS||[]).filter(function(p){ return p.id===pid })[0];
+    var custom = (customProvs()||[]).filter(function(c){ return c.id===pid })[0];
+    var src = prov || custom || {};
+    var plain = o[pid] || '';
+    if(!plain) continue;
+    var e = await encKey(plain);
+    rows.push({
+      user_email: SES.email,
+      provider:   pid,
+      prov_name:  src.name || pid,
+      base_url:   src.base || '',
+      models:     (src.models||[]).join(','),
+      key_enc:    e.enc,
+      key_hint:   hintKey(plain),
+      enc_mode:   mode,
+      updated_at: new Date().toISOString()
+    });
+  }
+  if(!rows.length) return {ok:false, msg:'No Keys to sync'};
+
+  try{
+    var r = await fetch(
+      ACCT.supaUrl + '/rest/v1/edge_ai_keys?on_conflict=user_email,provider',
+      {
+        method:'POST',
+        headers: Object.assign(ksHeaders(), {
+          'Prefer':'resolution=merge-duplicates,return=minimal'
+        }),
+        body: JSON.stringify(rows)
+      }
+    );
+    if(!r.ok){
+      var t = await r.text().catch(function(){return ''});
+      if(/edge_ai_keys/.test(t) && /does not exist|schema cache/i.test(t))
+        return {ok:false, msg:'Cloud table missing — run keys_cloud.sql first'};
+      return {ok:false, msg:'Upload failed (' + r.status + ')'};
+    }
+    return {ok:true, n: rows.length};
+  }catch(e){
+    return {ok:false, msg:'Cannot reach the cloud: ' + String(e.message||e).slice(0,50)};
+  }
+}
+
+/* Pull them back from the cloud */
+async function ksPull(){
+  if(SES.guest || !SES.token) return {ok:false, msg:'You need to sign in first'};
+  var mode = KEYSYNC.mode;
+  if(mode === 'user' && !KEYSYNC.pass)
+    return {ok:false, msg:'Enter your sync passphrase to decrypt'};
+
+  try{
+    var r = await fetch(
+      ACCT.supaUrl + '/rest/v1/edge_ai_keys'
+        + '?select=*&user_email=eq.' + encodeURIComponent(SES.email),
+      { method:'GET', headers: ksHeaders() }
+    );
+    if(!r.ok){
+      var t = await r.text().catch(function(){return ''});
+      if(/edge_ai_keys/.test(t) && /does not exist|schema cache/i.test(t))
+        return {ok:false, msg:'Cloud table missing — run keys_cloud.sql first'};
+      return {ok:false, msg:'Read failed (' + r.status + ')'};
+    }
+    var rows = await r.json();
+    if(!rows || !rows.length) return {ok:false, msg:'No Keys of yours in the cloud yet'};
+
+    var o = LS() || {};
+    var okN = 0, failN = 0;
+    for(var i=0;i<rows.length;i++){
+      var row = rows[i];
+      var plain = await decKey(row.key_enc, row.enc_mode, row.user_email);
+      if(plain){ o[row.provider] = plain; okN++; }
+      else { failN++; }
+    }
+    LSsave(o);
+    return {ok:true, n: okN, fail: failN};
+  }catch(e){
+    return {ok:false, msg:'Cannot reach the cloud: ' + String(e.message||e).slice(0,50)};
+  }
+}
+
+/* Delete a cloud record */
+async function ksDel(pid){
+  if(SES.guest || !SES.token) return;
+  try{
+    await fetch(
+      ACCT.supaUrl + '/rest/v1/edge_ai_keys'
+        + '?user_email=eq.' + encodeURIComponent(SES.email)
+        + '&provider=eq.' + encodeURIComponent(pid),
+      { method:'DELETE', headers: ksHeaders() }
+    );
+  }catch(e){}
+}
+
+/* ---------- Owner: view everyone’s config ---------- */
+async function ksListAll(){
+  if(!SES.isRoot) return {ok:false, msg:'Owner only'};
+  try{
+    var r = await fetch(
+      ACCT.supaUrl + '/rest/v1/rpc/edge_ai_list_keys',
+      { method:'POST', headers: ksHeaders(), body:'{}' }
+    );
+    if(!r.ok){
+      var t = await r.text().catch(function(){return ''});
+      if(/does not exist|schema cache/i.test(t))
+        return {ok:false, msg:'Table or function missing — run keys_cloud.sql first'};
+      return {ok:false, msg:'Read failed (' + r.status + ')'};
+    }
+    var rows = await r.json();
+    return {ok:true, rows: rows||[]};
+  }catch(e){
+    return {ok:false, msg:'Cannot reach the cloud'};
+  }
+}
+
+/* Log it when the owner views plaintext */
+async function ksAudit(targetEmail, provider, action){
+  if(!SES.isRoot) return;
+  try{
+    await fetch(ACCT.supaUrl + '/rest/v1/edge_ai_key_audit', {
+      method:'POST',
+      headers: Object.assign(ksHeaders(), {'Prefer':'return=minimal'}),
+      body: JSON.stringify({
+        viewer: SES.email, target: targetEmail,
+        provider: provider, action: action || 'view'
+      })
+    });
+  }catch(e){}
+}
+
+/* ---------- UI ---------- */
+function ksToggle(){
+  KEYSYNC.on = !KEYSYNC.on;
+  lsSet('edge_ks_on', KEYSYNC.on);
+  renderKsBar();
+  if(KEYSYNC.on) toast('Cloud sync is on — remember to hit Upload');
+  else toast('Cloud sync off, local Keys unchanged');
+}
+
+function ksSetMode(m){
+  KEYSYNC.mode = m;
+  lsSet('edge_ks_mode', m);
+  renderKsBar();
+}
+
+function ksSetPass(v){
+  KEYSYNC.pass = v;
+}
+
+function renderKsBar(){
+  var host = document.getElementById('ksBar');
+  if(!host) return;
+  var on = KEYSYNC.on;
+  var m  = KEYSYNC.mode;
+  host.innerHTML =
+    '<div class="row" style="margin-top:10px;flex-wrap:wrap;gap:8px">' +
+      '<button class="btn sm ' + (on?'pri':'') + '" onclick="ksToggle()">' +
+        (on ? '☁ Cloud sync: on' : '☁ Cloud sync: off') + '</button>' +
+      (on ?
+        '<button class="btn sm" onclick="ksPushUI()">⬆ Upload</button>' +
+        '<button class="btn sm" onclick="ksPullUI()">⬇ Pull</button>' +
+        '<span style="font-size:11px;color:var(--dim)">Mode: </span>' +
+        '<button class="btn sm ' + (m==='user'?'pri':'') + '" onclick="ksSetMode(\'user\')">Private</button>' +
+        '<button class="btn sm ' + (m==='host'?'':'pri') + '" onclick="ksSetMode(\'host\')">Hosted</button>' +
+        (m==='user' ?
+          '<input id="ksPass" type="password" placeholder="Sync passphrase (for decryption, never uploaded)" ' +
+          'style="flex:1;min-width:150px" value="' + esc(KEYSYNC.pass||'') + '" ' +
+          'oninput="ksSetPass(this.value)">' : '') +
+        ''
+      : '') +
+    '</div>' +
+    (on ? '<div style="margin-top:8px;font-size:11px;line-height:1.7;color:' +
+      (m==='host' ? 'var(--amber)' : 'var(--dim2)') + '">' +
+      (m==='host'
+        ? '⚠️ <b>Hosted mode</b>: the owner can decrypt and view your Key.'
+        : '🔒 <b>Private mode</b>: encrypted with your passphrase, the owner only sees a masked value (sk-ab****xy). Lost passphrase = unrecoverable.') +
+      '</div>'
+    : '');
+}
+
+async function ksPushUI(){
+  var r = await ksPush();
+  if(r.ok) toast('Uploaded ' + r.n + ' Keys to the cloud');
+  else toast(r.msg || 'Upload failed', true);
+}
+
+async function ksPullUI(){
+  var r = await ksPull();
+  if(r.ok){
+    toast('Pulled ' + r.n + '  Keys' + (r.fail ? '（' + r.fail + ' undecryptable)' : ''));
+    renderProvList();
+  }else toast(r.msg || 'Pull failed', true);
+}
+
+/* ---------- Owner panel: everyone’s config ---------- */
+async function renderKsAdmin(){
+  var host = document.getElementById('ksAdmin');
+  if(!host) return;
+  if(!SES.isRoot){ host.innerHTML=''; return; }
+
+  var r = await ksListAll();
+  if(!r.ok){
+    host.innerHTML = '<div class="ag-warn">Cloud Keys:' + esc(r.msg) + '</div>';
+    return;
+  }
+  var rows = r.rows;
+  if(!rows.length){
+    host.innerHTML = '<div style="font-size:12px;color:var(--dim)">Nobody has any Keys in the cloud yet</div>';
+    return;
+  }
+
+  /* Group by user */
+  var byUser = {};
+  rows.forEach(function(x){
+    var k = x.user_email || '(unknown)';
+    (byUser[k] = byUser[k] || []).push(x);
+  });
+
+  var html = '<div style="font-size:12px;color:var(--dim);margin-bottom:8px">' +
+    'total ' + rows.length + '  items · ' + Object.keys(byUser).length + ' users</div>';
+
+  Object.keys(byUser).forEach(function(em){
+    var list = byUser[em];
+    html += '<div style="border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:10px">'
+      + '<div style="font-size:12px;color:var(--cyan);margin-bottom:6px">👤 ' + esc(em) + '</div>';
+    list.forEach(function(x){
+      var canDec = (x.enc_mode === 'host');
+      html += '<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;'
+        + 'padding:6px 0;border-top:1px solid rgba(127,230,255,.08)">'
+        + '<span style="font-size:11px;min-width:88px">' + esc(x.prov_name||x.provider) + '</span>'
+        + '<code style="font-size:10px;color:var(--dim2);flex:1;word-break:break-all">'
+          + esc(x.base_url||'') + '</code>'
+        + '<code style="font-size:10px;color:var(--dim)">' + esc((x.models||'').slice(0,40)) + '</code>'
+        + '<code style="font-size:10px;color:' + (canDec?'var(--amber)':'var(--dim2)') + '">'
+          + esc(x.key_hint||'') + '</code>'
+        + (canDec
+            ? '<button class="btn sm" onclick="ksReveal(\'' + esc(x.id) + '\',\''
+                + esc(em) + '\',\'' + esc(x.provider) + '\')">Show plaintext</button>'
+            : '<span style="font-size:10px;color:var(--dim2)">Private🔒</span>')
+        + '<span id="kv_' + esc(x.id) + '" style="font-size:10px;color:var(--green);word-break:break-all"></span>'
+        + '</div>';
+    });
+    html += '</div>';
+  });
+
+  html += '<div class="ag-warn">⚠️ Viewing someone else’s Keys is written to the audit log.'
+    + 'These are other people’s paid credentials — troubleshooting only, nothing else.'
+    + 'If the database leaks, you’re the custodian and you’re responsible.</div>';
+
+  host.innerHTML = html;
+}
+
+async function ksReveal(id, email, provider){
+  var r = await ksListAll();
+  if(!r.ok) return;
+  var row = (r.rows||[]).filter(function(x){ return x.id===id })[0];
+  if(!row) return;
+  var plain = await decKey(row.key_enc, row.enc_mode, row.user_email);
+  var el = document.getElementById('kv_' + id);
+  if(el) el.textContent = plain ? plain : '(cannot decrypt)';
+  await ksAudit(email, provider, 'reveal');
+}
+
+/* ---------- Init ---------- */
+function ksInit(){
+  KEYSYNC.on   = lsGet('edge_ks_on', false);
+  KEYSYNC.mode = lsGet('edge_ks_mode', 'user');
+  renderKsBar();
+}
+
+
+
+/* ============================================================
+   EDGE // AI STUDIO Bot check（hCaptcha / Turnstile）
+   ------------------------------------------------------------
+   Unlike the main site, AI STUDIO talks to Supabase REST directly (/auth/v1/otp），
+   not supabase-js. So the captcha token goes into the fetch body:
+     GoTrue 的 captcha 中间件读 body.captcha_token
+     (some versions read body.gotrue_meta_security.captcha_token)
+   → send both, compatible with old and new versions.
+
+   Three entry points:
+     A. 邮箱验证码Sign in  → 真防护（Supabase 服务端校验，防刷邮件）
+     B. OAuth sign-in      → 前端挡一道（Supabase 不保护 OAuth）
+     C. Free model提问    → 前端挡一道（站长掏的免费额度，最该防）
+   ============================================================ */
+
+var AICAP = {
+  provider: 'hcaptcha',   /* 'hcaptcha' | 'turnstile' | 'off' */
+  siteKey:  '',           /* ← 填 Site Key；留空 = 全部Close */
+  onLogin:  true,         /* 邮箱验证码Sign in前验证 */
+  onOauth:  true,         /* OAuth sign-in前验证 */
+  onPub:    true          /* Verify before using free models (strongly recommended) */
+};
+
+/* Config is stored locally */
+(function(){
+  try{
+    var s = localStorage.getItem('edge_aicap_cfg');
+    if(s){ var o=JSON.parse(s); for(var k in o){ if(k in AICAP) AICAP[k]=o[k]; } }
+  }catch(e){}
+})();
+function aicapSave(){
+  try{ localStorage.setItem('edge_aicap_cfg', JSON.stringify({
+    provider:AICAP.provider, siteKey:AICAP.siteKey,
+    onLogin:AICAP.onLogin, onOauth:AICAP.onOauth, onPub:AICAP.onPub
+  })); }catch(e){}
+}
+
+/* ---------- Script source ---------- */
+function aicapSrc(){
+  if(AICAP.provider === 'hcaptcha')
+    return 'https://js.hcaptcha.com/1/api.js?render=explicit';
+  return 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+}
+function aicapLib(){ return AICAP.provider==='hcaptcha' ? window.hcaptcha : window.turnstile; }
+
+var _aicapLoading = null;
+function aicapLoad(){
+  if(aicapLib()) return Promise.resolve(true);
+  if(_aicapLoading) return _aicapLoading;
+  _aicapLoading = new Promise(function(res){
+    var s=document.createElement('script');
+    s.src=aicapSrc(); s.async=true; s.defer=true;
+    s.onload=function(){ res(true); };
+    s.onerror=function(){ res(false); };
+    document.head.appendChild(s);
+  });
+  return _aicapLoading;
+}
+
+function aicapOn(){
+  return AICAP.provider!=='off' && !!String(AICAP.siteKey||'').trim();
+}
+
+/* ---------- 弹窗验证，返回 token（Failed/Cancel返回 ''）---------- */
+function aicapChallenge(title){
+  return new Promise(async function(resolve){
+    if(!aicapOn()){ resolve(''); return; }
+
+    var okLoad = await aicapLoad();
+    if(!okLoad){ console.warn('[aicap] script failed to load, allowing through'); resolve(''); return; }
+
+    var old = document.getElementById('aicapModal');
+    if(old) old.remove();
+
+    var w = document.createElement('div');
+    w.id = 'aicapModal';
+    w.style.cssText =
+      'position:fixed;inset:0;z-index:2147483000;display:flex;align-items:center;' +
+      'justify-content:center;background:rgba(0,0,0,.74);backdrop-filter:blur(6px)';
+
+    w.innerHTML =
+      '<div style="background:#0e1419;border:1px solid rgba(127,230,255,.28);' +
+      'border-radius:14px;padding:20px;max-width:340px;width:88%;text-align:center">' +
+        '<div style="font-size:14px;font-weight:800;color:#7fe6ff;margin-bottom:6px">🛡 Bot check</div>' +
+        '<div style="font-size:11px;color:#8b98a5;line-height:1.7;margin-bottom:14px">' +
+          (title || 'Complete the check below') + '</div>' +
+        '<div id="aicapSlot" style="min-height:66px;display:flex;justify-content:center"></div>' +
+        '<div style="font-size:10.5px;color:#6b7885;margin-top:10px">Verification usually completes automatically</div>' +
+        '<button id="aicapCancel" style="margin-top:12px;background:none;border:1px solid ' +
+          'rgba(127,230,255,.25);color:#8b98a5;border-radius:8px;padding:6px 16px;' +
+          'font-size:11px;cursor:pointer">Cancel</button>' +
+      '</div>';
+
+    document.body.appendChild(w);
+
+    var done=false;
+    function finish(t){
+      if(done) return; done=true;
+      var m=document.getElementById('aicapModal'); if(m) m.remove();
+      resolve(t||'');
+    }
+    document.getElementById('aicapCancel').onclick=function(){ finish(''); };
+
+    try{
+      var slot=document.getElementById('aicapSlot');
+      var lib=aicapLib();
+      if(lib && typeof lib.render==='function'){
+        lib.render(slot, {
+          sitekey: String(AICAP.siteKey).trim(),
+          theme: 'dark',
+          callback: function(t){ finish(t); }
+        });
+      }else{ finish(''); }
+    }catch(e){ console.warn('[aicap] render failed, allowing through', e); finish(''); }
+
+    setTimeout(function(){ if(!done) finish(''); }, 60000);   /* Fallback */
+  });
+}
+
+/* ============================================================
+   A. 邮箱验证码Sign in —— 真防护
+   重写 supaOtp：body 里带上 captcha_token（新旧字段都带）
+   ============================================================ */
+window.supaOtp = async function(email, captchaToken){
+  try{
+    var tok = captchaToken || window.__aicapToken || '';
+    var body = { email: email, create_user: true };
+    if(tok){
+      body.captcha_token = tok;                                  /* GoTrue 新字段 */
+      body.gotrue_meta_security = { captcha_token: tok };        /* 兼容旧实现 */
+    }
+    var r = await fetch(ACCT.supaUrl+'/auth/v1/otp',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','apikey':ACCT.supaAnon},
+      body:JSON.stringify(body)
+    });
+    if(r.ok) return {ok:true};
+    var j = await r.json().catch(function(){ return {}; });
+    var m = (j && (j.msg||j.message||j.error_description)) || ('Send failed '+r.status);
+    if(/rate|limit/i.test(m)) m='Sending too fast, wait 60 seconds';
+    if(/captcha/i.test(m))    m='Bot check failed, please try again';
+    return {ok:false, msg:m};
+  }catch(e){ return {ok:false, msg:'Network error: '+(e.message||e)}; }
+};
+
+/* Wrap agSendCode: verify first, then send */
+(function(){
+  var orig = window.agSendCode;
+  if(typeof orig !== 'function') return;
+  window.agSendCode = async function(){
+    if(AICAP.onLogin && aicapOn()){
+      var t = await aicapChallenge('To stop bots spamming emails, please verify first');
+      if(!t){ toast('Cancelled, no code sent'); return; }
+      window.__aicapToken = t;
+    }
+    try{ return await orig.apply(this, arguments); }
+    finally{ window.__aicapToken = ''; }
+  };
+})();
+
+/* ============================================================
+   B. OAuth sign-in —— 前端挡一道
+   ============================================================ */
+(function(){
+  var orig = window.oauthLogin;
+  if(typeof orig !== 'function') return;
+  window.oauthLogin = async function(provider){
+    if(!(AICAP.onOauth && aicapOn())) return orig.apply(this, arguments);
+    var t = await aicapChallenge('Please verify first, then continue to '+String(provider).toUpperCase()+' sign-in');
+    if(!t) return;
+    return orig.apply(this, arguments);
+  };
+})();
+
+/* ============================================================
+   C. Free model提问 —— 前端挡一道（站长的免费额度，最该防）
+   ============================================================ */
+(function(){
+  var orig = window.acctPreAsk;
+  if(typeof orig !== 'function') return;
+  window.acctPreAsk = async function(selProvId){
+    var r = await orig.apply(this, arguments);
+    /* Only challenge free requests that would otherwise pass: stops scripts draining it */
+    if(r && r.ok && r.pub && AICAP.onPub && aicapOn() && !SES.isRoot){
+      var t = await aicapChallenge('Free models run on the owner’s quota — please verify first');
+      if(!t){
+        /* Verification failed — give the quota back */
+        try{
+          if(window.rpc && !r.cloud) { /* Cloud deductions aren’t rolled back, just noted */ }
+        }catch(e){}
+        return {ok:false, msg:'Complete the bot check to use free models'};
+      }
+    }
+    return r;
+  };
+})();
+
+/* ============================================================
+   Owner config UI (Keys page → inside the owner panel)
+   ============================================================ */
+function renderAicapCfg(host){
+  if(!host) return;
+  var c=AICAP;
+  host.innerHTML =
+   '<h3 style="font-size:13px;margin:0 0 8px">🛡 Bot check</h3>'+
+   '<div style="font-size:10.5px;color:var(--dim);line-height:1.7;margin-bottom:10px">'+
+     'Email-code sign-in uses <b>real server-side Supabase verification</b>; OAuth and free models get a front-end check.'+
+     'Put the <b>Secret Key</b> in your Supabase dashboard (Authentication → Bot and Abuse Protection),'+
+     'Only the <b>Site Key</b> goes here (it’s public).'+
+   '</div>'+
+   '<div class="grid g2">'+
+     '<div><label style="font-size:11px;color:var(--dim)">Provider</label>'+
+       '<select id="aicapProv" style="width:100%">'+
+         '<option value="hcaptcha"' +(c.provider==='hcaptcha' ?' selected':'')+'>hCaptcha (recommended)</option>'+
+         '<option value="turnstile"'+(c.provider==='turnstile'?' selected':'')+'>Cloudflare Turnstile</option>'+
+         '<option value="off"'      +(c.provider==='off'      ?' selected':'')+'>Close</option>'+
+       '</select></div>'+
+     '<div><label style="font-size:11px;color:var(--dim)">Site Key</label>'+
+       '<input id="aicapKey" placeholder="9ce1788b-2f9a-456f-988d-..." value="'+
+         String(c.siteKey||'').replace(/"/g,'&quot;')+'"></div>'+
+   '</div>'+
+   '<div style="margin-top:9px;display:flex;flex-direction:column;gap:6px">'+
+     '<label style="font-size:11px;color:var(--dim);display:flex;align-items:center;gap:6px;cursor:pointer">'+
+       '<input type="checkbox" id="aicapLogin"'+(c.onLogin?' checked':'')+' style="width:auto">'+
+       'Verify before email-code sign-in (real protection, stops mail spam)</label>'+
+     '<label style="font-size:11px;color:var(--dim);display:flex;align-items:center;gap:6px;cursor:pointer">'+
+       '<input type="checkbox" id="aicapOauth"'+(c.onOauth?' checked':'')+' style="width:auto">'+
+       'Verify before OAuth (Google/GitHub) sign-in</label>'+
+     '<label style="font-size:11px;color:var(--dim);display:flex;align-items:center;gap:6px;cursor:pointer">'+
+       '<input type="checkbox" id="aicapPub"'+(c.onPub?' checked':'')+' style="width:auto">'+
+       'Verify before using free models (recommended — protects the quota you pay for)</label>'+
+   '</div>'+
+   '<div class="row" style="margin-top:10px">'+
+     '<button class="btn sm pri" onclick="aicapSaveUI()">💾 Save</button>'+
+     '<button class="btn sm" onclick="aicapTest()">🔌 Test</button>'+
+     '<span id="aicapState" style="font-size:11px;color:var(--dim)"></span>'+
+   '</div>';
+}
+
+function aicapSaveUI(){
+  var g=function(id){ return document.getElementById(id); };
+  if(g('aicapProv'))  AICAP.provider = g('aicapProv').value;
+  if(g('aicapKey'))   AICAP.siteKey  = (g('aicapKey').value||'').trim();
+  if(g('aicapLogin')) AICAP.onLogin  = g('aicapLogin').checked;
+  if(g('aicapOauth')) AICAP.onOauth  = g('aicapOauth').checked;
+  if(g('aicapPub'))   AICAP.onPub    = g('aicapPub').checked;
+  aicapSave();
+  var st=g('aicapState');
+  if(st){
+    st.textContent = aicapOn() ? '✓ Enabled' : 'Disabled (no Site Key)';
+    st.style.color = aicapOn() ? 'var(--green)' : 'var(--dim)';
+  }
+  toast && toast('Bot check settings saved');
+}
+
+async function aicapTest(){
+  var st=document.getElementById('aicapState');
+  if(!aicapOn()){ if(st){ st.textContent='Please fill in the Site Key first'; st.style.color='var(--red)'; } return; }
+  if(st){ st.textContent='Verifying…'; st.style.color='var(--cyan)'; }
+  var t = await aicapChallenge('Test: complete the check below');
+  if(st){
+    st.textContent = t ? ('✓ Passed (token '+t.length+' chars)') : '✗ Failed or cancelled';
+    st.style.color = t ? 'var(--green)' : 'var(--red)';
+  }
+}
+
+
+
+/* ============================================================
+   EDGE // AI STUDIO dual mode: 🧒 Easy  /  🔧 Pro (power user)
+   ------------------------------------------------------------
+   Easy mode：只留"选一个 AI → 打字 → Send"，
+             Hides temperature,/Stream/Arena/debug,/Keys and other pro options;
+             jargon becomes plain words and errors speak human.
+   Pro mode: everything open + extra params (system prompt, / max length, /
+             top_p / penalties) + a raw request debug panel.
+   ============================================================ */
+
+var MODE = 'easy';   /* 'easy' | 'pro' */
+
+/* ---------- Persistence ---------- */
+(function(){
+  try{
+    var m = localStorage.getItem('edge_ai_mode');
+    if(m === 'pro' || m === 'easy') MODE = m;
+  }catch(e){}
+})();
+function modeSave(){ try{ localStorage.setItem('edge_ai_mode', MODE); }catch(e){} }
+
+function isEasy(){ return MODE === 'easy'; }
+function isPro(){  return MODE === 'pro';  }
+
+/* ---------- Advanced params (Pro mode only) ---------- */
+var ADV = { sys:'', maxTokens:'', topP:'', freq:'', pres:'' };
+(function(){
+  try{
+    var s = localStorage.getItem('edge_ai_adv');
+    if(s){ var o = JSON.parse(s); for(var k in o){ if(k in ADV) ADV[k]=o[k]; } }
+  }catch(e){}
+})();
+function advSave(){ try{ localStorage.setItem('edge_ai_adv', JSON.stringify(ADV)); }catch(e){} }
+
+/* ============================================================
+   Mode switching
+   ============================================================ */
+function setMode(m, silent){
+  m = (m === 'pro') ? 'pro' : 'easy';
+  MODE = m; modeSave();
+  var b = document.body;
+  b.classList.remove('edge-mode-easy','edge-mode-pro');
+  b.classList.add('edge-mode-' + m);
+
+  renderModeSwitch();
+  renderAdvPanel();
+  renderEasyGuide();
+  applyEasyTerms();
+
+  /* Switching to Pro while on a hidden view returns to chat */
+  if(m === 'easy'){
+    var ar = document.getElementById('v-arena');
+    if(ar && ar.classList.contains('on')) go('chat', document.querySelector('.tab[data-v="chat"]'));
+  }
+  if(!silent) toast && toast(m === 'pro' ? '🔧 Pro mode: every feature unlocked' : '🧒 Easy mode: only the simplest controls');
+}
+
+/* ---------- Top-bar toggle buttons ---------- */
+function renderModeSwitch(){
+  var old = document.getElementById('modeSwitch');
+  if(old) old.remove();
+  var host = document.querySelector('.top-right');
+  if(!host) return;
+
+  var w = document.createElement('div');
+  w.id = 'modeSwitch';
+  w.style.cssText = 'display:flex;gap:0;border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-right:8px';
+  w.innerHTML =
+    '<button id="mEasy" onclick="setMode(\'easy\')" style="' + modeBtnCss(isEasy()) + '">🧒 Easy</button>' +
+    '<button id="mPro"  onclick="setMode(\'pro\')"  style="' + modeBtnCss(isPro())  + '">🔧 Pro</button>';
+  host.insertBefore(w, host.firstChild);
+}
+function modeBtnCss(on){
+  return 'background:' + (on ? 'linear-gradient(90deg,#1de4ff,#39ff9e)' : 'transparent') + ';' +
+         'color:' + (on ? '#04202a' : 'var(--dim)') + ';' +
+         'border:none;padding:5px 11px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap';
+}
+
+/* ============================================================
+   Easy mode: first-time guide card
+   ============================================================ */
+function renderEasyGuide(){
+  var old = document.getElementById('easyGuide');
+  if(old) old.remove();
+  if(!isEasy()) return;
+
+  var host = document.querySelector('#v-chat');
+  if(!host) return;
+
+  /* Only shown when no Key is filled in */
+  var hasKey = false;
+  try{
+    var ps = window.PROVIDERS || [];
+    for(var i=0;i<ps.length;i++){ if(getKey(ps[i].id)){ hasKey=true; break; } }
+  }catch(e){}
+  if(hasKey) return;
+
+  var d = document.createElement('div');
+  d.id = 'easyGuide';
+  d.className = 'card';
+  d.style.cssText = 'margin-bottom:12px;border-color:rgba(57,255,158,.35)';
+  d.innerHTML =
+    '<h3>👋 First time here? Three steps to start chatting</h3>' +
+    '<div style="font-size:12px;color:var(--dim);line-height:2">' +
+      '<div><b style="color:#39ff9e">1.</b> Tap <b>🔑 Keys</b> at the top → pick a provider → paste your Key</div>' +
+      '<div><b style="color:#39ff9e">2.</b> Back to <b>💬 Chat</b>, pick an AI at the top</div>' +
+      '<div><b style="color:#39ff9e">3.</b> Type below and hit Enter, that’s it</div>' +
+    '</div>' +
+    '<div style="margin-top:10px;font-size:11px;color:var(--dim2);line-height:1.7">' +
+      'No Key? Start with the owner’s <b>🎁 Free model</b> (free, a few goes each).<br>' +
+      'Want everything? Switch to <b>🔧 Pro</b> at the top right.' +
+    '</div>' +
+    '<div class="row" style="margin-top:10px">' +
+      '<button class="btn pri sm" onclick="go(\'keys\',document.querySelector(\'.tab[data-v=\\\'keys\\\']\'))">🔑 Go fill in a Key</button>' +
+      '<button class="btn sm" onclick="setMode(\'pro\')">🔧 I’m a pro</button>' +
+    '</div>';
+  host.insertBefore(d, host.firstChild);
+}
+
+/* ============================================================
+   Pro mode: advanced params panel
+   ============================================================ */
+function renderAdvPanel(){
+  var old = document.getElementById('advPanel');
+  if(old) old.remove();
+  if(!isPro()) return;
+
+  var host = document.querySelector('#v-chat');
+  if(!host) return;
+  var first = host.firstChild;
+
+  var d = document.createElement('div');
+  d.id = 'advPanel';
+  d.className = 'card';
+  d.style.cssText = 'padding:10px 12px;margin-bottom:10px';
+  d.innerHTML =
+    '<div class="row" style="margin-bottom:8px">' +
+      '<b style="font-size:12px;color:var(--cyan)">⚙️ Advanced</b>' +
+      '<span style="font-size:10.5px;color:var(--dim2)">Blank = default · Pro mode only</span>' +
+      '<button class="btn sm" style="margin-left:auto" onclick="toggleAdv()">Expand / Collapse</button>' +
+    '</div>' +
+    '<div id="advBody" style="display:none">' +
+      '<div class="grid g2">' +
+        '<div style="grid-column:1/-1">' +
+          '<label style="font-size:11px;color:var(--dim)">System prompt · sets the AI’s persona</label>' +
+          '<textarea id="advSys" rows="2" placeholder="e.g. You are a concise technical assistant, answer in 3 sentences or fewer">' + esc(ADV.sys) + '</textarea>' +
+        '</div>' +
+        '<div><label style="font-size:11px;color:var(--dim)">Max output tokens</label>' +
+          '<input id="advMax" type="number" min="1" max="32000" placeholder="2000" value="' + esc(ADV.maxTokens) + '"></div>' +
+        '<div><label style="font-size:11px;color:var(--dim)">top_p (0–1, blank = default)</label>' +
+          '<input id="advTopP" type="number" step="0.05" min="0" max="1" placeholder="leave blank" value="' + esc(ADV.topP) + '"></div>' +
+        '<div><label style="font-size:11px;color:var(--dim)">frequency_penalty（-2–2）</label>' +
+          '<input id="advFreq" type="number" step="0.1" min="-2" max="2" placeholder="leave blank" value="' + esc(ADV.freq) + '"></div>' +
+        '<div><label style="font-size:11px;color:var(--dim)">presence_penalty（-2–2）</label>' +
+          '<input id="advPres" type="number" step="0.1" min="-2" max="2" placeholder="leave blank" value="' + esc(ADV.pres) + '"></div>' +
+      '</div>' +
+      '<div class="row" style="margin-top:10px">' +
+        '<button class="btn pri sm" onclick="advSaveUI()">💾 Save</button>' +
+        '<button class="btn sm" onclick="advClear()">Clear</button>' +
+      '</div>' +
+      '<div style="margin-top:10px;border-top:1px solid var(--line);padding-top:9px">' +
+        '<div class="row">' +
+          '<b style="font-size:11.5px;color:var(--cyan)">🔬 Request debug</b>' +
+          '<button class="btn sm" onclick="showLastReq()">View last request</button>' +
+        '</div>' +
+        '<pre id="dbgOut" style="display:none;margin:8px 0 0;font-size:10px;color:var(--dim);' +
+          'white-space:pre-wrap;word-break:break-all;max-height:220px;overflow:auto;' +
+          'background:rgba(0,0,0,.35);padding:9px;border-radius:7px"></pre>' +
+      '</div>' +
+    '</div>';
+  host.insertBefore(d, first);
+}
+
+function toggleAdv(){
+  var b = document.getElementById('advBody');
+  if(b) b.style.display = (b.style.display === 'none') ? '' : 'none';
+}
+
+function advSaveUI(){
+  var g = function(id){ return (document.getElementById(id)||{}).value || ''; };
+  ADV.sys       = g('advSys').trim();
+  ADV.maxTokens = g('advMax').trim();
+  ADV.topP      = g('advTopP').trim();
+  ADV.freq      = g('advFreq').trim();
+  ADV.pres      = g('advPres').trim();
+  advSave();
+  toast && toast('Advanced settings saved');
+}
+function advClear(){
+  ADV = { sys:'', maxTokens:'', topP:'', freq:'', pres:'' };
+  advSave(); renderAdvPanel();
+  toast && toast('Advanced settings cleared');
+}
+
+/* ---------- Debug: record the last request ---------- */
+var LAST_REQ = null;
+(function(){
+  var orig = window.callAI;
+  if(typeof orig !== 'function') return;
+  window.callAI = async function(prov, model, opts){
+    opts = opts || {};
+    /* Inject the pro params */
+    if(isPro()){
+      if(ADV.sys){
+        var msgs = (opts.messages||[]).slice();
+        var hasSys = false;
+        for(var i=0;i<msgs.length;i++) if(msgs[i].role==='system') hasSys=true;
+        if(!hasSys) msgs.unshift({role:'system', content:ADV.sys});
+        opts.messages = msgs;
+      }
+      if(ADV.maxTokens){ var n=parseInt(ADV.maxTokens,10); if(n>0) opts.maxTokens=n; }
+      opts._extra = {};
+      if(ADV.topP!=='') opts._extra.top_p = parseFloat(ADV.topP);
+      if(ADV.freq!=='') opts._extra.frequency_penalty = parseFloat(ADV.freq);
+      if(ADV.pres!=='') opts._extra.presence_penalty = parseFloat(ADV.pres);
+    }
+    LAST_REQ = {
+      prov: (prov&&prov.name)||'', model: model,
+      base: (prov&&prov.base)||'', proxy: ACCT.proxyUrl||'',
+      opts: { temperature:opts.temperature, maxTokens:opts.maxTokens,
+              stream:opts.stream, extra:opts._extra||null,
+              msgCount:(opts.messages||[]).length },
+      at: new Date().toLocaleTimeString('zh-CN')
+    };
+    return orig.apply(this, arguments);
+  };
+})();
+
+function showLastReq(){
+  var o = document.getElementById('dbgOut');
+  if(!o) return;
+  if(!LAST_REQ){ o.style.display=''; o.textContent='No requests yet.'; return; }
+  o.style.display = '';
+  o.textContent =
+    'Time        ' + LAST_REQ.at + '\n' +
+    'Provider      ' + LAST_REQ.prov + '\n' +
+    'Model        ' + LAST_REQ.model + '\n' +
+    'Endpoint      ' + LAST_REQ.base + '\n' +
+    'Relay         ' + (LAST_REQ.proxy || '(direct)') + '\n' +
+    'Temperature        ' + LAST_REQ.opts.temperature + '\n' +
+    'Max tokens    ' + (LAST_REQ.opts.maxTokens || 'Default') + '\n' +
+    'Stream        ' + (LAST_REQ.opts.stream ? 'Yes' : 'No') + '\n' +
+    'Messages      ' + LAST_REQ.opts.msgCount + '\n' +
+    'Extra params  ' + JSON.stringify(LAST_REQ.opts.extra || {});
+}
+
+/* ============================================================
+   Easy mode: jargon in plain words
+   ============================================================ */
+var EASY_TERMS = [
+  ['Temperature',        null],
+];
+function applyEasyTerms(){
+  var lbl = document.getElementById('chatTempLbl');
+  if(lbl && isEasy()) lbl.textContent = 'Creativity';
+  if(lbl && isPro())  lbl.textContent = 'Temperature';
+
+  /* Keys page title */
+  var h = document.querySelector('#v-keys h3');
+  /* Relay hint: one plain sentence for beginners */
+  var px = document.getElementById('proxyCard');
+  if(px){
+    var tip = document.getElementById('easyPxTip');
+    if(isEasy() && !tip){
+      var d = document.createElement('div');
+      d.id = 'easyPxTip';
+      d.className = 'ag-warn';
+      d.style.margin = '0 0 10px';
+      d.innerHTML = 'If sending a message shows <b>Failed to fetch</b> (can’t connect),' +
+        'your network can’t reach that AI. A relay address fixes it — ' +
+        'if that’s too fiddly, switch to <b>🔧 Pro mode</b> for the full guide, or ask the owner.';
+      px.insertBefore(d, px.firstChild);
+    }else if(!isEasy() && tip){ tip.remove(); }
+  }
+}
+
+/* ============================================================
+   Easy mode: errors in plain words
+   ============================================================ */
+var EASY_ERR_MAP = [
+  [/Failed to fetch|NetworkError|net::ERR/i,
+   'Can’t reach that AI — usually a network or CORS issue. Add a relay address on the 🔑 Keys page, or try another model.'],
+  [/401|Unauthorized|invalid api key|Incorrect API key/i,
+   'The Key is wrong or expired. Paste a fresh one on the 🔑 Keys page.'],
+  [/429|rate.?limit|quota/i,
+   'This one says you’re going too fast / the quota is used up. Wait a while, or switch models.'],
+  [/404|not found.*model|does not exist/i,
+   'This model name doesn’t exist there. Try a different model.'],
+  [/insufficient|balance|billing/i,
+   'This account is out of credit. Top it up, or switch to a free model.'],
+  [/timeout|aborted/i,
+   'Timed out. Slow network or a busy model — try sending again.']
+];
+function easyErrMsg(raw){
+  if(!isEasy()) return raw;
+  var s = String(raw || '');
+  for(var i=0;i<EASY_ERR_MAP.length;i++){
+    if(EASY_ERR_MAP[i][0].test(s)) return EASY_ERR_MAP[i][1];
+  }
+  return 'Something went wrong: ' + s.slice(0, 120);
+}
+
+/* 把 AI Error弹窗文案换成大白话 */
+(function(){
+  var orig = window.showErr;
+  if(typeof orig !== 'function') return;
+  window.showErr = function(title, msg){
+    return orig.call(this, title, easyErrMsg(msg));
+  };
+})();
+
+/* ============================================================
+   Boot
+   ============================================================ */
+(function(){
+  function boot(){
+    setMode(MODE, true);
+  }
+  if(document.readyState === 'loading')
+    document.addEventListener('DOMContentLoaded', boot);
+  else boot();
+})();
+
+
+
+
+
+</script>
+<footer style="text-align:center;padding:12px;color:#888;font-size:11px">© 2026 EDGE // SPACE (uxuvoyiz81-edge) · All Rights Reserved · Unauthorized copying / Fork / download prohibited</footer></body>
+</html>
